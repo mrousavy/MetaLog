@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 
 namespace MetaLog {
-    public static class Helper {
+    public static class Utilities {
         private const string TreeStart = "┌";
         private const string TreeItem = "├";
         private const string TreeEnd = "└";
@@ -38,6 +39,17 @@ namespace MetaLog {
         }
 
         /// <summary>
+        /// Build a log message
+        /// </summary>
+        /// <returns>The built log message</returns>
+        internal static string BuildMessage(LogSeverity severity, string text, string callerFile, string callerMember, int callerLine) {
+            string time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            string file = Path.GetFileNameWithoutExtension(callerFile);
+
+            return $"[{severity}] [{time}] [{file}.{callerMember}:{callerLine}]: {text}";
+        }
+
+        /// <summary>
         /// Censor a given string.
         /// </summary>
         /// <param name="text">The text to censor</param>
@@ -61,16 +73,25 @@ namespace MetaLog {
         /// (will increase by 4 each inner-exception)</param>
         /// <returns>A built tree of <see cref="Exception.InnerException"/>s</returns>
         public static string RecurseException(Exception exception, int indent = 0) {
+            string nl = Environment.NewLine;
+            string message = $"{exception.GetType()}: {exception.Message}{nl}{exception.StackTrace}"; //construct message
 
-            string message = exception.Message;
             if (exception.InnerException != null) {
                 message += RecurseException(exception.InnerException, indent + 4);
             }
+
+            message = BuildTree(message, indent > 0);
             return message;
         }
 
         /// <summary>
-        /// Build a tree of the given input
+        /// Build a tree of the given input. Example:
+        /// <para/>
+        /// ┌ Tree Start <para/>
+        /// ├ Tree item 1 <para/>
+        /// ├ Tree item 2 <para/>
+        /// ├ Tree item 3 <para/>
+        /// └ Tree End
         /// </summary>
         /// <param name="input">The given input string</param>
         /// <param name="isSubtree">Indicating whether this is a
@@ -78,7 +99,7 @@ namespace MetaLog {
         /// <param name="isEnd">Indicating whether this is the
         /// last tree</param>
         /// <returns>A built tree</returns>
-        public static string BuildTree(string input, bool isSubtree, bool isEnd) {
+        public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true) {
             string[] lines = input.Split(new[] {Environment.NewLine},
                 StringSplitOptions.RemoveEmptyEntries);
             switch (lines.Length) {
