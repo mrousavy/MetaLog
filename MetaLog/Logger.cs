@@ -94,7 +94,9 @@ namespace MetaLog {
         /// Release all resources and close any Streams
         /// </summary>
         public static void Dispose() {
-            FileStream?.Dispose();
+            lock (Lock) { //lock so we don't interrupt a FileStream's write op
+                FileStream?.Dispose();
+            }
         }
 
         #endregion
