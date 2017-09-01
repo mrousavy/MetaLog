@@ -93,6 +93,40 @@ namespace MetaLog {
         }
 
         /// <summary>
+        /// Indent all lines of the given text by the given amount of whitespaces
+        /// </summary>
+        /// <param name="text">The input text</param>
+        /// <param name="amount">The amount of whitespaces to indent</param>
+        public static string Indent(string text, int amount) {
+            string indent = new string(' ', amount);
+            string[] lines = text.Split(new[] { Nl },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < lines.Length; i++) {
+                lines[i] = $"{indent}{lines[i]}{Nl}";
+            }
+
+            string result = string.Concat(lines);
+            return result;
+        }
+
+        /// <summary>
+        /// Resest the indent of all lines of the given text
+        /// </summary>
+        /// <param name="text">The input text</param>
+        public static string ResetIndent(string text) {
+            string[] lines = text.Split(new[] { Nl },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < lines.Length; i++) {
+                lines[i] = $"{lines[i].TrimStart()}{Nl}";
+            }
+
+            string result = string.Concat(lines);
+            return result;
+        }
+
+        /// <summary>
         /// Build a tree of the given input. Example:
         /// <para/>
         /// ┌ Tree Start <para/>
