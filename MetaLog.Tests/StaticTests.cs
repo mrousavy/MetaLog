@@ -12,7 +12,7 @@ namespace MetaLog.Tests {
         }
 
         [TestMethod]
-        public void TestThrowExceptionLog() {
+        public void StaticTestThrowExceptionLog() {
             MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Starting Exception-Log Test.");
             try {
                 throw Helper.BuildException();
@@ -22,22 +22,22 @@ namespace MetaLog.Tests {
             MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Exception-Log Test is about to finish.");
         }
         [TestMethod]
-        public void TestExceptionLog() {
+        public void StaticTestExceptionLog() {
             var ex = new Exception("Exception message.");
             MetaLog.Logger.Log(MetaLog.LogSeverity.Error, ex);
         }
         [TestMethod]
-        public void TestExceptionLogAsync() {
+        public void StaticTestExceptionLogAsync() {
             var ex = new Exception("Exception message.");
             Task task = MetaLog.Logger.LogAsync(MetaLog.LogSeverity.Error, ex);
             task.GetAwaiter().GetResult();
         }
         [TestMethod]
-        public void TestLog() {
+        public void StaticTestLog() {
             MetaLog.Logger.Log(MetaLog.LogSeverity.Error, "Testing basic text logging.");
         }
         [TestMethod]
-        public void TestLogAsync() {
+        public void StaticTestLogAsync() {
             Task task = MetaLog.Logger.LogAsync(MetaLog.LogSeverity.Error, "Testing basic text logging.");
             task.GetAwaiter().GetResult();
         }
