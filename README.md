@@ -1,6 +1,8 @@
 # MetaLog
 > **Simple, yet effective, logging with Metadata CallerInfo for creating beautiful Log files in C#/VB .NET**
 
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/u3sp06j9n72sb8t5?svg=true)](#MetaLog) | [![NuGet package downloads](https://img.shields.io/nuget/dt/MetaLog.svg)](http://nuget.org/packages/MetaLog)
+
 > _.NET Standard 2.0 Class Library_
 
 Install via **NuGet Package Manager**:
