@@ -131,8 +131,28 @@ namespace MetaLog {
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
         /// <param name="exception">An occured <see cref="Exception"/></param>
-        public static void Log(LogSeverity severity, Exception exception) {
-            
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        public static void Log(LogSeverity severity, Exception exception,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0) {
+            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+
+            string message = Utilities.RecurseException(exception); //build exception tree
+            string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+
+            lock (Lock) { //lock to sync object to prevent inconsistency
+                if (UseStream) {
+                    //write via filestream
+                    byte[] bytes = Encoding.GetBytes(text);
+                    FileStream.Write(bytes, 0, bytes.Length);
+                } else {
+                    //write via Sytem.IO.File helper
+                    File.AppendAllText(LogFile, text);
+                }
+            }
         }
 
         #endregion
