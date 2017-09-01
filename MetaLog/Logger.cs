@@ -7,8 +7,9 @@ namespace MetaLog {
     /// </summary>
     public static class Logger {
         private static bool _useStream;
-        private static string _logFile;
+        private static string _logFile = Path.Combine(Helper.MetaLogAppData, $"{Helper.ExecutingAssemblyName}.log");
 
+        #region Properties
         /// <summary>
         /// Lock object so no logging interferes
         /// </summary>
@@ -19,9 +20,12 @@ namespace MetaLog {
         /// </summary>
         private static FileStream FileStream { get; set; }
         /// <summary>
-        /// The log file this <see cref="ILogger"/> instance logs to
-        /// (Setting this to null will close the Stream if 
-        /// <see cref="UseStream"/> is set to true
+        /// The path to the log file this <see cref="ILogger"/> 
+        /// instance logs to.
+        /// By default, this value is %appdata%/MetaLog/[YourAssemblyName].log
+        /// <para/>
+        /// (Setting this to null will close the
+        /// Stream if <see cref="UseStream"/> is set to true)
         /// </summary>
         /// <exception cref="DirectoryNotFoundException">Thrown when the directory of the
         /// file does not exist. Create the Directory of the <see cref="LogFile"/>
@@ -58,6 +62,7 @@ namespace MetaLog {
         /// for release builds)</em>
         /// </summary>
         public static LogSeverity MinimumSeverity { get; set; }
+        #endregion
 
         /// <summary>
         /// <em>(Re-)</em>open or close the <see cref="FileStream"/> to 

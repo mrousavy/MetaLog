@@ -1,8 +1,35 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 
 namespace MetaLog {
-    public static class Helper
-    {
+    public static class Helper {
+        /// <summary>
+        /// Path to %appdata%
+        /// </summary>
+        public static string AppData { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        /// <summary>
+        /// Path to %appdata%/MetaLog
+        /// </summary>
+        public static string MetaLogAppData {
+            get {
+                string path = Path.Combine(AppData, "MetaLog");
+                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                return path;
+            }
+        }
+
+        /// <summary>
+        /// Get the Assembly this MetaLogger is called by
+        /// </summary>
+        public static string ExecutingAssemblyName {
+            get {
+                var execAssembly = Assembly.GetExecutingAssembly();
+                return execAssembly.FullName;
+            }
+        }
+
         /// <summary>
         /// Censor a given string.
         /// </summary>
