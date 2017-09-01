@@ -247,5 +247,38 @@ namespace MetaLog {
             await tcs.Task;
         }
         #endregion
+
+
+        #region ctor
+        /// <summary>
+        /// Create a new <see cref="ILogger"/> instance with the given properties
+        /// </summary>
+        /// <param name="logfile"></param>
+        /// <returns>An initialized <see cref="ILogger"/></returns>
+        public static ILogger New(string logfile) {
+            return new MetaLogger(logfile);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="ILogger"/> instance with the given properties
+        /// </summary>
+        /// <param name="logfile"></param>
+        /// <param name="minSeverity">The LogFile</param>
+        /// <returns>An initialized <see cref="ILogger"/></returns>
+        public static ILogger New(string logfile, LogSeverity minSeverity) {
+            return new MetaLogger(logfile, minSeverity);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="ILogger"/> instance with the given properties
+        /// </summary>
+        /// <param name="logfile"></param>
+        /// <param name="minSeverity">The LogFile</param>
+        /// <param name="useStream">The LogFile</param>
+        /// <returns>An initialized <see cref="ILogger"/></returns>
+        public static ILogger New(string logfile, LogSeverity minSeverity, bool useStream) {
+            return new MetaLogger(logfile, minSeverity, useStream);
+        }
+        #endregion
     }
 }
