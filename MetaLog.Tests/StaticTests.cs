@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MetaLog.Tests {
@@ -9,13 +8,16 @@ namespace MetaLog.Tests {
         [TestInitialize]
         public void Initialize() {
             MetaLog.Logger.UseStream = true;
-            MetaLog.Logger.Encoding = Encoding.ASCII;
         }
 
         [TestMethod]
         public void TestStaticLog1() {
             MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Starting Test 1.");
-            MetaLog.Logger.Log(MetaLog.LogSeverity.Info, Helper.BuildException());
+            try {
+                throw Helper.BuildException();
+            } catch (Exception ex) {
+                MetaLog.Logger.Log(MetaLog.LogSeverity.Info, ex);
+            }
             MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Test 1 is about to finish.");
         }
         [TestMethod]
