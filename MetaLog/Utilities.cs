@@ -50,7 +50,25 @@ namespace MetaLog {
             string time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
             string file = Path.GetFileNameWithoutExtension(callerFile);
 
-            return $"[{severity}] [{time}] [{file}.{callerMember}:{callerLine}]: {text}{Nl}";
+            string strSeverity = $"[{severity}]";
+            strSeverity = BringOnSameLength(strSeverity, 10); //Longest Severity ("Critical": 8) + brackets "[": 1 & "]": 1 = 10
+            string strMemberInfo = $"[{file}.{callerMember}:{callerLine}]:";
+            strMemberInfo = BringOnSameLength(strMemberInfo, 40); //unknown, just guess 20
+
+            return $"{strSeverity} [{time}] {strMemberInfo} {text}{Nl}";
+        }
+
+        /// <summary>
+        /// Bring the given input to the given length by adding whitespaces to the end
+        /// </summary>
+        /// <param name="input">The input string</param>
+        /// <param name="length">The length for this string to be</param>
+        /// <returns></returns>
+        private static string BringOnSameLength(string input, int length) {
+            if (input.Length >= length) return input; //return on wrong input
+
+            string spaces = new string(' ', length - input.Length);
+            return input + spaces;
         }
 
         /// <summary>
@@ -78,10 +96,13 @@ namespace MetaLog {
         /// <returns>A built tree of <see cref="Exception.InnerException"/>s</returns>
         public static string RecurseException(Exception exception, int indent = 0) {
             //TODO: Use StringBuilder?
-            string stacktrace = exception.StackTrace.TrimStart(); //add stacktrace if existing
-            stacktrace = BuildTree(stacktrace, true);
+            string stacktrace = string.Empty;
+            if (exception.StackTrace != null) {
+                stacktrace = exception.StackTrace.TrimStart(); //add stacktrace if existing
+                stacktrace = BuildTree(stacktrace, true) + Nl;
+            }
 
-            string message = $"{exception.GetType()}: {exception.Message}{Nl}{stacktrace}{Nl}"; //construct message
+            string message = $"{exception.GetType()}: {exception.Message}{Nl}{stacktrace}"; //construct message
 
             if (exception.InnerException != null) {
                 message += RecurseException(exception.InnerException, indent + 4);
@@ -101,7 +122,9 @@ namespace MetaLog {
                 StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++) {
-                lines[i] = $"{indent}{lines[i]}{Nl}";
+                lines[i] = $"{indent}{lines[i]}";
+                if (i != lines.Length - 1)
+                    lines[i] += Nl; //add \n to every but last line
             }
 
             string result = string.Concat(lines);
