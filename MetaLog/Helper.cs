@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace MetaLog {
     public static class Helper {
-        private static string _treeStart = "┌";
-        private static string _treeItem = "├";
-        private static string _treeEnd = "└";
-        private static string _subTreeStart = "┬";
-        private static string _hSpacer = "─";
+        private const string TreeStart = "┌";
+        private const string TreeItem = "├";
+        private const string TreeEnd = "└";
+        private const string SubTreeStart = "┬";
+        private const string HSpacer = "─";
 
 
         /// <summary>
@@ -67,6 +67,49 @@ namespace MetaLog {
                 message += RecurseException(exception.InnerException, indent + 4);
             }
             return message;
+        }
+
+        /// <summary>
+        /// Build a tree of the given input
+        /// </summary>
+        /// <param name="input">The given input string</param>
+        /// <param name="isSubtree">Indicating whether this is a
+        /// subtree</param>
+        /// <param name="isEnd">Indicating whether this is the
+        /// last tree</param>
+        /// <returns>A built tree</returns>
+        public static string BuildTree(string input, bool isSubtree, bool isEnd) {
+            string[] lines = input.Split(new[] {Environment.NewLine},
+                StringSplitOptions.RemoveEmptyEntries);
+            switch (lines.Length) {
+                case 0:
+                    return string.Empty;
+                case 1:
+                    return $"{SubTreeStart} {lines[0]}";
+            }
+            
+            string nl = Environment.NewLine;
+
+            string trimmed = lines[0].TrimStart(); //remove first whitespaces
+            string indent = new string(' ', lines[0].Length - trimmed.Length); //get original whitespace indent
+
+            string start = isSubtree ? SubTreeStart : TreeStart; //make ┬ or ┌ 
+            lines[0] = $"{indent}{start} {trimmed}";
+
+            for (int i = 1; i < lines.Length - 1; i++) {
+                lines[i] = $"{indent}{TreeItem} {lines[i]}"; //make ├ {line}
+            }
+
+            string result;
+            if (isEnd) {
+                lines[lines.Length - 1] += $"{indent}{TreeEnd}{lines[lines.Length - 1]}";  //make └
+                result = lines.ToString();
+            } else {
+                lines[lines.Length - 1] += $"{indent}{TreeItem}{lines[lines.Length - 1]}";  //make ├
+                result = lines.ToString();
+                result += $"{nl}{indent}{TreeEnd}{HSpacer}"; //make └─
+            }
+            return result;
         }
     }
 }
