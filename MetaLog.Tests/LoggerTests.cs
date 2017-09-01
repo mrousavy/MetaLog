@@ -7,9 +7,11 @@ namespace MetaLog.Tests {
     [TestClass]
     public class LoggerTests {
         public static ILogger Logger;
+
         public static string LogDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "MetaLog.Tests");
+
         public static string LogFile = Path.Combine(LogDir, "log.log");
 
         [TestInitialize]
@@ -33,21 +35,25 @@ namespace MetaLog.Tests {
             }
             Logger.Log(MetaLog.LogSeverity.Info, "Exception-Log Test is about to finish.");
         }
+
         [TestMethod]
         public void TestExceptionLog() {
             var ex = new Exception("Exception message.");
             Logger.Log(MetaLog.LogSeverity.Error, ex);
         }
+
         [TestMethod]
         public void TestExceptionLogAsync() {
             var ex = new Exception("Exception message.");
             Task task = Logger.LogAsync(MetaLog.LogSeverity.Error, ex);
             task.GetAwaiter().GetResult();
         }
+
         [TestMethod]
         public void TestLog() {
             Logger.Log(MetaLog.LogSeverity.Error, "Testing basic text logging.");
         }
+
         [TestMethod]
         public void TestLogAsync() {
             Task task = Logger.LogAsync(MetaLog.LogSeverity.Error, "Testing basic text logging.");
