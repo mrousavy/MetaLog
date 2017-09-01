@@ -41,12 +41,12 @@ namespace MetaLog {
         /// <summary>
         /// The log file this <see cref="ILogger"/> instance logs to
         /// </summary>
-        string LogFile { get; }
+        string LogFile { get; set; }
         /// <summary>
-        /// Whether this <see cref="ILogger"/> should use a single
-        /// (File)-<see cref="Stream"/> for logging instead of opening new
-        /// ones each log. (This may be faster but locks the file
-        /// until the <see cref="ILogger"/> gets disposed, see: 
+        /// Whether this <see cref="ILogger"/> uses a single
+        /// (File)-<see cref="Stream"/> for logging, or opens new
+        /// ones each log. (<see cref="Stream"/>s may be faster, but
+        /// locks the file until the <see cref="ILogger"/> gets disposed, see: 
         /// <see href="https://en.wikipedia.org/wiki/File_locking">file locking</see>)
         /// </summary>
         bool UseStream { get; }
@@ -55,7 +55,7 @@ namespace MetaLog {
         /// (It is recommended to use higher values such as <see cref="LogSeverity.Error"/>
         /// for releases)
         /// </summary>
-        LogSeverity MinimumSeverity { get; }
+        LogSeverity MinimumSeverity { get; set; }
 
         /// <summary>
         /// Log a new message to the <see cref="LogFile"/>
