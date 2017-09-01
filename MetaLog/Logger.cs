@@ -140,7 +140,9 @@ namespace MetaLog {
             [CallerLineNumber] int line = 0) {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
-            string message = Utilities.RecurseException(exception); //build exception tree
+            string message = Utilities.RecurseException(exception, 2); //build exception tree
+            message = Utilities.BuildTree(message);
+            message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
             string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
 
             lock (Lock) { //lock to sync object to prevent inconsistency
