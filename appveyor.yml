@@ -6,6 +6,8 @@ dotnet_csproj:
   file: 'MetaLog\*.csproj'
   version: '{version}'
   package_version: '{version}'
+cache:
+  - packages -> **\packages.config
 
 before_build:
 - cmd: >-
@@ -14,10 +16,13 @@ before_build:
     nuget restore
 build:
   verbosity: minimal
+after_build:
+- cmd: >-
+    dotnet pack MetaLog\MetaLog.csproj
 
 artifacts:
-  - path: MetaLog\bin\$(configuration)\netstandard2.0\*
-    name: ReleaseArtifact
+  - path: MetaLog\bin\$(configuration)\netstandard2.0\*.nupkg
+    name: NupkgArtifact
 deploy:
   provider: NuGet
   api_key:
