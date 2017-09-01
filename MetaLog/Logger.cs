@@ -25,6 +25,7 @@ namespace MetaLog {
             set {
                 if (value == _logFile) return; //don't reopen stream if it's same value
                 _logFile = value;
+                ReOpenStream();
             }
         }
         /// <summary>
@@ -42,6 +43,15 @@ namespace MetaLog {
         /// </summary>
         public static LogSeverity MinimumSeverity { get; set; }
 
+        private static void ReOpenStream() {
+            lock (Lock) { //lock to our lock object so we don't close a stream mid-write
+                FileStream?.Dispose(); //dispose the stream if open
+                if (LogFile != null && UseStream) { //open filestream if Path is not null and Logger uses streams
+                    //create a new filestream to the LogFile (create if file does not exist, and seek to end)
+                    FileStream = new FileStream(LogFile, FileMode.Append, FileAccess.Write);
+                }
+            }
+        }
 
 
         /// <summary>
