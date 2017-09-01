@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Dynamic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace MetaLog {
     /// <summary>
@@ -7,14 +10,18 @@ namespace MetaLog {
     /// </summary>
     public static class Logger {
         private static bool _useStream;
-        private static string _logFile = Path.Combine(Helper.MetaLogAppData, $"{Helper.ExecutingAssemblyName}.log");
+        private static string _logFile = Path.Combine(Utilities.MetaLogAppData, $"{Utilities.ExecutingAssemblyName}.log");
 
         #region Properties
         /// <summary>
         /// Lock object so no logging interferes
         /// </summary>
         private static object Lock { get; } = new object();
-        
+
+        /// <summary>
+        /// The <see cref="Encoding"/> this <see cref="ILogger"/> instance uses
+        /// </summary>
+        private static Encoding Encoding { get; set; } = Encoding.Default;
         /// <summary>
         /// The <see cref="FileStream"/> used for writing to the LogFile
         /// </summary>
@@ -64,6 +71,8 @@ namespace MetaLog {
         public static LogSeverity MinimumSeverity { get; set; }
         #endregion
 
+        #region Functions
+
         /// <summary>
         /// <em>(Re-)</em>open or close the <see cref="FileStream"/> to 
         /// the <em>(new)</em> <see cref="LogFile"/> depending on the 
@@ -79,14 +88,34 @@ namespace MetaLog {
             }
         }
 
+        #endregion
+
+        #region Logging
 
         /// <summary>
         /// Log a new message to the <see cref="LogFile"/>
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
         /// <param name="message">The actual log-message</param>
-        public static void Log(LogSeverity severity, string message) {
-            
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        public static void Log(LogSeverity severity, string message,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0) {
+            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+
+            string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+
+            lock (Lock) { //lock to sync object to prevent inconsistency
+                if (UseStream) {
+                    byte[] bytes = Encoding.GetBytes(text);
+                    FileStream.Write(bytes, 0, bytes.Length);
+                } else {
+                    File.AppendAllText(LogFile, text);
+                }
+            }
         }
 
         /// <summary>
@@ -98,5 +127,7 @@ namespace MetaLog {
         public static void Log(LogSeverity severity, Exception exception) {
             
         }
+
+        #endregion
     }
 }
