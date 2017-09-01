@@ -21,17 +21,17 @@ namespace MetaLog {
         /// <summary>
         /// The log file this <see cref="ILogger"/> instance logs to
         /// (Setting this to null will close the Stream if 
-        /// <see cref="Logger.UseStream"/> is set to true
+        /// <see cref="UseStream"/> is set to true
         /// </summary>
         /// <exception cref="DirectoryNotFoundException">Thrown when the directory of the
-        /// file does not exist. Create the Directory of the <see cref="Logger.LogFile"/>
+        /// file does not exist. Create the Directory of the <see cref="LogFile"/>
         /// before setting this value</exception>
         public static string LogFile {
             get => _logFile;
             set {
                 if (value == _logFile) return; //don't reopen stream if it's same value
                 _logFile = value;
-                ReOpenStream();
+                ToggleStream();
             }
         }
         /// <summary>
@@ -42,14 +42,14 @@ namespace MetaLog {
         /// <see href="https://en.wikipedia.org/wiki/File_locking">file locking</see>)
         /// </summary>
         /// <exception cref="DirectoryNotFoundException">Thrown when the directory of the
-        /// file does not exist. Create the Directory of the <see cref="Logger.LogFile"/>
+        /// file does not exist. Create the Directory of the <see cref="LogFile"/>
         /// before setting this value</exception>
         public static bool UseStream {
             get => _useStream;
             set {
                 if (value == _useStream) return; //don't change stream if it's same value
                 _useStream = value;
-                ReOpenStream();
+                ToggleStream();
             }
         }
         /// <summary>
@@ -60,9 +60,11 @@ namespace MetaLog {
         public static LogSeverity MinimumSeverity { get; set; }
 
         /// <summary>
-        /// <em>(Re-)</em>open the <see cref="Logger.FileStream"/> to the <em>(new)</em> <see cref="Logger.LogFile"/>
+        /// <em>(Re-)</em>open or close the <see cref="FileStream"/> to 
+        /// the <em>(new)</em> <see cref="LogFile"/> depending on the 
+        /// <see cref="UseStream"/> property
         /// </summary>
-        private static void ReOpenStream() {
+        private static void ToggleStream() {
             lock (Lock) { //lock to our lock object so we don't close a stream mid-write
                 FileStream?.Dispose(); //dispose the stream if open
                 if (LogFile != null && UseStream) { //open filestream if Path is not null and Logger uses streams
