@@ -11,6 +11,10 @@ namespace MetaLog {
         private const string SubTreeStart = "┬";
         private const string HSpacer = "─";
 
+        /// <summary>
+        /// The new line character. Default: \n, May be <see cref="Environment.NewLine"/>
+        /// </summary>
+        public static string Nl { get; set; } = "\n"; //Environment.NewLine ?
 
         /// <summary>
         /// Path to %appdata%
@@ -46,7 +50,7 @@ namespace MetaLog {
             string time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
             string file = Path.GetFileNameWithoutExtension(callerFile);
 
-            return $"[{severity}] [{time}] [{file}.{callerMember}:{callerLine}]: {text}{Environment.NewLine}";
+            return $"[{severity}] [{time}] [{file}.{callerMember}:{callerLine}]: {text}{Nl}";
         }
 
         /// <summary>
