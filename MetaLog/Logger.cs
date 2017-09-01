@@ -2,6 +2,8 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MetaLog {
     /// <summary>
@@ -159,6 +161,89 @@ namespace MetaLog {
             }
         }
 
+        /// <summary>
+        /// Log a new message to the <see cref="LogFile"/>
+        /// </summary>
+        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
+        /// <param name="message">The actual log-message</param>
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        public static async Task LogAsync(LogSeverity severity, string message,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0) {
+            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
+            new Thread(() => {
+                try {
+                    string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+
+                    lock (Lock) {
+                        //lock to sync object to prevent inconsistency
+                        if (UseStream) {
+                            byte[] bytes = Encoding.GetBytes(text);
+                            FileStream.Write(bytes, 0, bytes.Length);
+                        } else {
+                            File.AppendAllText(LogFile, text);
+                        }
+                    }
+                    tcs.SetResult(true);
+                } catch (Exception ex) {
+                    tcs.SetException(ex);
+                }
+            }).Start();
+            
+            await tcs.Task;
+        }
+
+        /// <summary>
+        /// Log a new <see cref="Exception"/> tree (up to most 
+        /// inner <see cref="Exception"/>) to the <see cref="LogFile"/> async
+        /// </summary>
+        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
+        /// <param name="exception">An occured <see cref="Exception"/></param>
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        public static async Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0) {
+            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
+            new Thread(() => {
+                try {
+                    string message = Utilities.RecurseException(exception, 2); //build exception tree
+                    message = Utilities.BuildTree(message);
+                    message = Utilities.Indent(message, indent);
+                    message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
+                    string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+
+                    lock (Lock) {
+                        //lock to sync object to prevent inconsistency
+                        if (UseStream) {
+                            //write via filestream
+                            byte[] bytes = Encoding.GetBytes(text);
+                            FileStream.Write(bytes, 0, bytes.Length);
+                        } else {
+                            //write via Sytem.IO.File helper
+                            File.AppendAllText(LogFile, text);
+                        }
+                    }
+                    tcs.SetResult(true);
+                } catch (Exception ex) {
+                    tcs.SetException(ex);
+                }
+            }).Start();
+
+            await tcs.Task;
+        }
         #endregion
     }
 }

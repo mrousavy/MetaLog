@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MetaLog {
 
@@ -74,5 +75,19 @@ namespace MetaLog {
         /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
         /// <param name="exception">An occured <see cref="Exception"/></param>
         void Log(LogSeverity severity, Exception exception);
+
+        /// <summary>
+        /// Log a new message to the <see cref="LogFile"/> async
+        /// </summary>
+        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
+        /// <param name="message">The actual log-message</param>
+        Task LogAsync(LogSeverity severity, string message);
+        /// <summary>
+        /// Log a new <see cref="Exception"/> tree (up to most 
+        /// inner <see cref="Exception"/>) to the <see cref="LogFile"/> async
+        /// </summary>
+        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
+        /// <param name="exception">An occured <see cref="Exception"/></param>
+        Task LogAsync(LogSeverity severity, Exception exception);
     }
 }
