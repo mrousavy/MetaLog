@@ -21,7 +21,7 @@ after_build:
     dotnet pack MetaLog\MetaLog.csproj
 
 artifacts:
-  - path: MetaLog\bin\$(configuration)\netstandard2.0\*.nupkg
+  - path: MetaLog\bin\$(configuration)\*.nupkg
     name: NupkgArtifact
 deploy:
   provider: NuGet
