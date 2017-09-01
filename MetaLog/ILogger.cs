@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace MetaLog {
 
@@ -36,8 +37,11 @@ namespace MetaLog {
     /// <summary>
     /// A MetaLog logger
     /// </summary>
-    public interface ILogger : IDisposable
-    {
+    public interface ILogger : IDisposable {
+        /// <summary>
+        /// The <see cref="Encoding"/> this <see cref="ILogger"/> instance uses
+        /// </summary>
+        Encoding Encoding { get; set; }
         /// <summary>
         /// The log file this <see cref="ILogger"/> instance logs to
         /// </summary>
