@@ -7,37 +7,44 @@ using System.Threading.Tasks;
 
 namespace MetaLog {
     /// <summary>
-    /// A static <see cref="ILogger"/>
+    ///     A static <see cref="ILogger" />
     /// </summary>
     public static class Logger {
         private static bool _useStream;
-        private static string _logFile = Path.Combine(Utilities.MetaLogAppData, $"{Utilities.ExecutingAssemblyName}.log");
+
+        private static string _logFile =
+            Path.Combine(Utilities.MetaLogAppData, $"{Utilities.ExecutingAssemblyName}.log");
 
         #region Properties
+
         /// <summary>
-        /// Lock object so no logging interferes
+        ///     Lock object so no logging interferes
         /// </summary>
         private static object Lock { get; } = new object();
 
         /// <summary>
-        /// The <see cref="Encoding"/> this <see cref="ILogger"/> instance uses
+        ///     The <see cref="Encoding" /> this <see cref="ILogger" /> instance uses
         /// </summary>
         private static readonly Encoding Encoding = Encoding.Unicode;
+
         /// <summary>
-        /// The <see cref="FileStream"/> used for writing to the LogFile
+        ///     The <see cref="FileStream" /> used for writing to the LogFile
         /// </summary>
         private static FileStream FileStream { get; set; }
+
         /// <summary>
-        /// The path to the log file this <see cref="ILogger"/> 
-        /// instance logs to.
-        /// By default, this value is %appdata%/MetaLog/[YourAssemblyName].log
-        /// <para/>
-        /// (Setting this to null will close the
-        /// Stream if <see cref="UseStream"/> is set to true)
+        ///     The path to the log file this <see cref="ILogger" />
+        ///     instance logs to.
+        ///     By default, this value is %appdata%/MetaLog/[YourAssemblyName].log
+        ///     <para />
+        ///     (Setting this to null will close the
+        ///     Stream if <see cref="UseStream" /> is set to true)
         /// </summary>
-        /// <exception cref="DirectoryNotFoundException">Thrown when the directory of the
-        /// file does not exist. Create the Directory of the <see cref="LogFile"/>
-        /// before setting this value</exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     Thrown when the directory of the
+        ///     file does not exist. Create the Directory of the <see cref="LogFile" />
+        ///     before setting this value
+        /// </exception>
         public static string LogFile {
             get => _logFile;
             set {
@@ -46,16 +53,19 @@ namespace MetaLog {
                 ToggleStream();
             }
         }
+
         /// <summary>
-        /// Whether this <see cref="ILogger"/> uses a single
-        /// (File)-<see cref="Stream"/> for logging, or opens new
-        /// ones each log. (<see cref="Stream"/>s may be faster, but
-        /// locks the file until the <see cref="ILogger"/> gets disposed, see: 
-        /// <see href="https://en.wikipedia.org/wiki/File_locking">file locking</see>)
+        ///     Whether this <see cref="ILogger" /> uses a single
+        ///     (File)-<see cref="Stream" /> for logging, or opens new
+        ///     ones each log. (<see cref="Stream" />s may be faster, but
+        ///     locks the file until the <see cref="ILogger" /> gets disposed, see:
+        ///     <see href="https://en.wikipedia.org/wiki/File_locking">file locking</see>)
         /// </summary>
-        /// <exception cref="DirectoryNotFoundException">Thrown when the directory of the
-        /// file does not exist. Create the Directory of the <see cref="LogFile"/>
-        /// before setting this value</exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     Thrown when the directory of the
+        ///     file does not exist. Create the Directory of the <see cref="LogFile" />
+        ///     before setting this value
+        /// </exception>
         public static bool UseStream {
             get => _useStream;
             set {
@@ -64,25 +74,31 @@ namespace MetaLog {
                 ToggleStream();
             }
         }
+
         /// <summary>
-        /// The minimum <see cref="LogSeverity"/> to log by this <see cref="Logger"/>
-        /// <em>(It is recommended to use higher values such as <see cref="LogSeverity.Error"/>
-        /// for release builds)</em>
+        ///     The minimum <see cref="LogSeverity" /> to log by this <see cref="Logger" />
+        ///     <em>
+        ///         (It is recommended to use higher values such as <see cref="LogSeverity.Error" />
+        ///         for release builds)
+        ///     </em>
         /// </summary>
         public static LogSeverity MinimumSeverity { get; set; }
+
         #endregion
 
         #region Functions
 
         /// <summary>
-        /// <em>(Re-)</em>open or close the <see cref="FileStream"/> to 
-        /// the <em>(new)</em> <see cref="LogFile"/> depending on the 
-        /// <see cref="UseStream"/> property
+        ///     <em>(Re-)</em>open or close the <see cref="FileStream" /> to
+        ///     the <em>(new)</em> <see cref="LogFile" /> depending on the
+        ///     <see cref="UseStream" /> property
         /// </summary>
         private static void ToggleStream() {
-            lock (Lock) { //lock to our lock object so we don't close a stream mid-write
+            lock (Lock) {
+                //lock to our lock object so we don't close a stream mid-write
                 FileStream?.Dispose(); //dispose the stream if open
-                if (LogFile != null && UseStream) { //open filestream if Path is not null and Logger uses streams
+                if (LogFile != null && UseStream) {
+                    //open filestream if Path is not null and Logger uses streams
                     //create a new filestream to the LogFile (create if file does not exist, and seek to end)
                     FileStream = new FileStream(LogFile, FileMode.Append, FileAccess.Write);
                     FileStream.Position = FileStream.Length; //set position to end
@@ -91,10 +107,11 @@ namespace MetaLog {
         }
 
         /// <summary>
-        /// Release all resources and close any Streams
+        ///     Release all resources and close any Streams
         /// </summary>
         public static void Dispose() {
-            lock (Lock) { //lock so we don't interrupt a FileStream's write op
+            lock (Lock) {
+                //lock so we don't interrupt a FileStream's write op
                 FileStream?.Dispose();
             }
         }
@@ -104,9 +121,9 @@ namespace MetaLog {
         #region Logging
 
         /// <summary>
-        /// Log a new message to the <see cref="LogFile"/>
+        ///     Log a new message to the <see cref="LogFile" />
         /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
+        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>
         /// <param name="member">The calling member for this Log message</param>
         /// <param name="file">The calling source file for this Log message</param>
@@ -119,7 +136,8 @@ namespace MetaLog {
 
             string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
 
-            lock (Lock) { //lock to sync object to prevent inconsistency
+            lock (Lock) {
+                //lock to sync object to prevent inconsistency
                 if (UseStream) {
                     byte[] bytes = Encoding.GetBytes(text);
                     FileStream.Write(bytes, 0, bytes.Length);
@@ -130,11 +148,11 @@ namespace MetaLog {
         }
 
         /// <summary>
-        /// Log a new <see cref="Exception"/> tree (up to most 
-        /// inner <see cref="Exception"/>) to the <see cref="LogFile"/>
+        ///     Log a new <see cref="Exception" /> tree (up to most
+        ///     inner <see cref="Exception" />) to the <see cref="LogFile" />
         /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
-        /// <param name="exception">An occured <see cref="Exception"/></param>
+        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
+        /// <param name="exception">An occured <see cref="Exception" /></param>
         /// <param name="member">The calling member for this Log message</param>
         /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
         /// <param name="file">The calling source file for this Log message</param>
@@ -151,7 +169,8 @@ namespace MetaLog {
             message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
             string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
 
-            lock (Lock) { //lock to sync object to prevent inconsistency
+            lock (Lock) {
+                //lock to sync object to prevent inconsistency
                 if (UseStream) {
                     //write via filestream
                     byte[] bytes = Encoding.GetBytes(text);
@@ -164,9 +183,9 @@ namespace MetaLog {
         }
 
         /// <summary>
-        /// Log a new message to the <see cref="LogFile"/>
+        ///     Log a new message to the <see cref="LogFile" />
         /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
+        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>
         /// <param name="member">The calling member for this Log message</param>
         /// <param name="file">The calling source file for this Log message</param>
@@ -197,16 +216,16 @@ namespace MetaLog {
                     tcs.SetException(ex);
                 }
             }).Start();
-            
+
             await tcs.Task;
         }
 
         /// <summary>
-        /// Log a new <see cref="Exception"/> tree (up to most 
-        /// inner <see cref="Exception"/>) to the <see cref="LogFile"/> async
+        ///     Log a new <see cref="Exception" /> tree (up to most
+        ///     inner <see cref="Exception" />) to the <see cref="LogFile" /> async
         /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
-        /// <param name="exception">An occured <see cref="Exception"/></param>
+        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
+        /// <param name="exception">An occured <see cref="Exception" /></param>
         /// <param name="member">The calling member for this Log message</param>
         /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
         /// <param name="file">The calling source file for this Log message</param>
@@ -246,39 +265,42 @@ namespace MetaLog {
 
             await tcs.Task;
         }
+
         #endregion
 
 
         #region ctor
+
         /// <summary>
-        /// Create a new <see cref="ILogger"/> instance with the given properties
+        ///     Create a new <see cref="ILogger" /> instance with the given properties
         /// </summary>
         /// <param name="logfile"></param>
-        /// <returns>An initialized <see cref="ILogger"/></returns>
+        /// <returns>An initialized <see cref="ILogger" /></returns>
         public static ILogger New(string logfile) {
             return new MetaLogger(logfile);
         }
 
         /// <summary>
-        /// Create a new <see cref="ILogger"/> instance with the given properties
+        ///     Create a new <see cref="ILogger" /> instance with the given properties
         /// </summary>
         /// <param name="logfile"></param>
         /// <param name="minSeverity">The LogFile</param>
-        /// <returns>An initialized <see cref="ILogger"/></returns>
+        /// <returns>An initialized <see cref="ILogger" /></returns>
         public static ILogger New(string logfile, LogSeverity minSeverity) {
             return new MetaLogger(logfile, minSeverity);
         }
 
         /// <summary>
-        /// Create a new <see cref="ILogger"/> instance with the given properties
+        ///     Create a new <see cref="ILogger" /> instance with the given properties
         /// </summary>
         /// <param name="logfile"></param>
         /// <param name="minSeverity">The LogFile</param>
         /// <param name="useStream">The LogFile</param>
-        /// <returns>An initialized <see cref="ILogger"/></returns>
+        /// <returns>An initialized <see cref="ILogger" /></returns>
         public static ILogger New(string logfile, LogSeverity minSeverity, bool useStream) {
             return new MetaLogger(logfile, minSeverity, useStream);
         }
+
         #endregion
     }
 }

@@ -7,25 +7,26 @@ using System.Threading.Tasks;
 
 namespace MetaLog {
     public class MetaLogger : ILogger {
-        private bool _useStream;
         private string _logFile = Path.Combine(Utilities.MetaLogAppData, $"{Utilities.ExecutingAssemblyName}.log");
+        private bool _useStream;
 
         #region ctor
+
         /// <summary>
-        /// Create a new MetaLogger with the given filename
+        ///     Create a new MetaLogger with the given filename
         /// </summary>
         /// <param name="filename">The LogFile</param>
         public MetaLogger(string filename) : this(filename, LogSeverity.Info, false) { }
 
         /// <summary>
-        /// Create a new MetaLogger with the given filename
+        ///     Create a new MetaLogger with the given filename
         /// </summary>
         /// <param name="filename">The LogFile</param>
         /// <param name="minSeverity">The LogFile</param>
         public MetaLogger(string filename, LogSeverity minSeverity) : this(filename, minSeverity, false) { }
 
         /// <summary>
-        /// Create a new MetaLogger with the given filename
+        ///     Create a new MetaLogger with the given filename
         /// </summary>
         /// <param name="filename">The LogFile</param>
         /// <param name="minSeverity">The LogFile</param>
@@ -35,9 +36,11 @@ namespace MetaLog {
             MinimumSeverity = minSeverity;
             UseStream = useStream;
         }
+
         #endregion
 
         #region Properties
+
         private object Lock { get; } = new object();
         private FileStream FileStream { get; set; }
 
@@ -62,6 +65,7 @@ namespace MetaLog {
         }
 
         public LogSeverity MinimumSeverity { get; set; }
+
         #endregion
 
         #region Functions
@@ -69,9 +73,11 @@ namespace MetaLog {
         private void ToggleStream() {
             if (FileStream?.Name == LogFile) return; //no need to reopen stream if it's on our file
 
-            lock (Lock) { //lock to our lock object so we don't close a stream mid-write
+            lock (Lock) {
+                //lock to our lock object so we don't close a stream mid-write
                 FileStream?.Dispose(); //dispose the stream if open
-                if (LogFile != null && UseStream) { //open filestream if Path is not null and Logger uses streams
+                if (LogFile != null && UseStream) {
+                    //open filestream if Path is not null and Logger uses streams
                     //create a new filestream to the LogFile (create if file does not exist, and seek to end)
                     FileStream = new FileStream(LogFile, FileMode.Append, FileAccess.Write);
                     FileStream.Position = FileStream.Length; //set position to end
@@ -98,7 +104,8 @@ namespace MetaLog {
 
             string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
 
-            lock (Lock) { //lock to sync object to prevent inconsistency
+            lock (Lock) {
+                //lock to sync object to prevent inconsistency
                 if (UseStream) {
                     byte[] bytes = Encoding.GetBytes(text);
                     FileStream.Write(bytes, 0, bytes.Length);
@@ -120,7 +127,8 @@ namespace MetaLog {
             message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
             string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
 
-            lock (Lock) { //lock to sync object to prevent inconsistency
+            lock (Lock) {
+                //lock to sync object to prevent inconsistency
                 if (UseStream) {
                     //write via filestream
                     byte[] bytes = Encoding.GetBytes(text);
