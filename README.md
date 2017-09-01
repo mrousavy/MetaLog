@@ -68,7 +68,7 @@ Logger.Log(LogSeverity.Info, "Logged in as mrousavy, version 1.0!");
 ```
 
 # Performance
-![.NET Unit-Test Results](http:)
+![.NET Unit-Test Results](https://github.com/mrousavy/MetaLog/raw/master/Images/Tests_Screenshot.png)
 
 # License
 > Thanks for using **MetaLog**! License: [MIT](https://github.com/mrousavy/MetaLog/blob/master/LICENSE), [mrousavy](http://github.com/mrousavy) 2017
