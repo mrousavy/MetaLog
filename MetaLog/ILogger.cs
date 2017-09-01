@@ -53,7 +53,7 @@ namespace MetaLog {
         /// <summary>
         /// The minimum <see cref="LogSeverity"/> to log by this Logger instance
         /// (It is recommended to use higher values such as <see cref="LogSeverity.Error"/>
-        /// for releases)
+        /// for release builds)
         /// </summary>
         LogSeverity MinimumSeverity { get; set; }
 
