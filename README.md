@@ -1,5 +1,8 @@
-# MetaLog
-> **Simple, yet effective, logging with Metadata CallerInfo for creating beautiful Log files in C#/VB .NET**
+<p align="center">
+  <img align="right" src="https://github.com/mrousavy/MetaLog/raw/master/Images/file_icon.ico" alt="Icon">
+  <h1 align="left">MetaLog</h1>
+  <blockquote align="left"><strong>Simple, yet effective, logging with Metadata CallerInfo for creating beautiful Log files in C#/VB .NET</strong></blockquote>
+</p>
 
 > _.NET Standard 2.0 Class Library_
 
