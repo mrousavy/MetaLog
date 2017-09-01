@@ -3,10 +3,9 @@ image: Visual Studio 2017
 configuration: Release
 dotnet_csproj:
   patch: true
-  file: '**\*.csproj'
+  file: 'MetaLog\*.csproj'
   version: '{version}'
   package_version: '{version}'
-publish_nuget: true
 
 before_build:
 - cmd: >-
