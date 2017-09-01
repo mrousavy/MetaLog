@@ -88,6 +88,13 @@ namespace MetaLog {
             }
         }
 
+        /// <summary>
+        /// Release all resources and close any Streams
+        /// </summary>
+        public static void Dispose() {
+            FileStream?.Dispose();
+        }
+
         #endregion
 
         #region Logging
