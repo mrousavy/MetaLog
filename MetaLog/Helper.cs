@@ -4,6 +4,13 @@ using System.Reflection;
 
 namespace MetaLog {
     public static class Helper {
+        private static string _treeStart = "┌";
+        private static string _treeItem = "├";
+        private static string _treeEnd = "└";
+        private static string _subTreeStart = "┬";
+        private static string _hSpacer = "─";
+
+
         /// <summary>
         /// Path to %appdata%
         /// </summary>
@@ -43,6 +50,23 @@ namespace MetaLog {
             int toCensor = (int)Math.Floor(length * censorPercent);
             string censored = text.Substring(0, toCensor) + new string(censorChar, length - toCensor);
             return censored;
+        }
+
+        /// <summary>
+        /// Walk up an <see cref="Exception.InnerException"/> tree
+        /// and return the result in string form.
+        /// </summary>
+        /// <param name="exception">The original <see cref="Exception"/></param>
+        /// <param name="indent">The amount of spaces for indentation
+        /// (will increase by 4 each inner-exception)</param>
+        /// <returns>A built tree of <see cref="Exception.InnerException"/>s</returns>
+        public static string RecurseException(Exception exception, int indent = 0) {
+
+            string message = exception.Message;
+            if (exception.InnerException != null) {
+                message += RecurseException(exception.InnerException, indent + 4);
+            }
+            return message;
         }
     }
 }
