@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MetaLog.Tests {
@@ -26,8 +27,19 @@ namespace MetaLog.Tests {
             MetaLog.Logger.Log(MetaLog.LogSeverity.Error, ex);
         }
         [TestMethod]
+        public void TestExceptionLogAsync() {
+            var ex = new Exception("Exception message.");
+            Task task = MetaLog.Logger.LogAsync(MetaLog.LogSeverity.Error, ex);
+            task.GetAwaiter().GetResult();
+        }
+        [TestMethod]
         public void TestLog() {
             MetaLog.Logger.Log(MetaLog.LogSeverity.Error, "Testing basic text logging.");
+        }
+        [TestMethod]
+        public void TestLogAsync() {
+            Task task = MetaLog.Logger.LogAsync(MetaLog.LogSeverity.Error, "Testing basic text logging.");
+            task.GetAwaiter().GetResult();
         }
     }
 }
