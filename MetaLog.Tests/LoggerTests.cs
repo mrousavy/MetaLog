@@ -5,6 +5,10 @@ namespace MetaLog.Tests {
     public class LoggerTests {
         public static ILogger logger;
 
+        [TestInitialize]
+        public void Initialize() {
+            logger = new MetaLog.Logger.New();
+        }
 
         [TestMethod]
         public void TestLog1() {

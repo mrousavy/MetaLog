@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -54,7 +55,7 @@ namespace MetaLog {
         /// locks the file until the <see cref="ILogger"/> gets disposed, see: 
         /// <see href="https://en.wikipedia.org/wiki/File_locking">file locking</see>)
         /// </summary>
-        bool UseStream { get; }
+        bool UseStream { get; set; }
         /// <summary>
         /// The minimum <see cref="LogSeverity"/> to log by this Logger instance
         /// (It is recommended to use higher values such as <see cref="LogSeverity.Error"/>
@@ -67,27 +68,53 @@ namespace MetaLog {
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
         /// <param name="message">The actual log-message</param>
-        void Log(LogSeverity severity, string message);
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        void Log(LogSeverity severity, string message,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0);
         /// <summary>
         /// Log a new <see cref="Exception"/> tree (up to most 
         /// inner <see cref="Exception"/>) to the <see cref="LogFile"/>
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
         /// <param name="exception">An occured <see cref="Exception"/></param>
-        void Log(LogSeverity severity, Exception exception);
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        void Log(LogSeverity severity, Exception exception, int indent = 2,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0);
 
         /// <summary>
         /// Log a new message to the <see cref="LogFile"/> async
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
         /// <param name="message">The actual log-message</param>
-        Task LogAsync(LogSeverity severity, string message);
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        Task LogAsync(LogSeverity severity, string message,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0);
         /// <summary>
         /// Log a new <see cref="Exception"/> tree (up to most 
         /// inner <see cref="Exception"/>) to the <see cref="LogFile"/> async
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity"/> of this message</param>
         /// <param name="exception">An occured <see cref="Exception"/></param>
-        Task LogAsync(LogSeverity severity, Exception exception);
+        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
+        /// <param name="file">The calling source file for this Log message</param>
+        /// <param name="line">The line number in the calling file for this Log message</param>
+        Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
+            [CallerFilePath] string file = null,
+            [CallerMemberName] string member = null,
+            [CallerLineNumber] int line = 0);
     }
 }
