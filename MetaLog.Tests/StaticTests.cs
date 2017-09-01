@@ -11,26 +11,23 @@ namespace MetaLog.Tests {
         }
 
         [TestMethod]
-        public void TestStaticLog1() {
-            MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Starting Test 1.");
+        public void TestThrowExceptionLog() {
+            MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Starting Exception-Log Test.");
             try {
                 throw Helper.BuildException();
             } catch (Exception ex) {
-                MetaLog.Logger.Log(MetaLog.LogSeverity.Info, ex);
+                MetaLog.Logger.Log(MetaLog.LogSeverity.Error, ex);
             }
-            MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Test 1 is about to finish.");
+            MetaLog.Logger.Log(MetaLog.LogSeverity.Info, "Exception-Log Test is about to finish.");
         }
         [TestMethod]
-        public void TestStaticLog2() {
-
+        public void TestExceptionLog() {
+            var ex = new Exception("Exception message.");
+            MetaLog.Logger.Log(MetaLog.LogSeverity.Error, ex);
         }
         [TestMethod]
-        public void TestStaticLog3() {
-
-        }
-        [TestMethod]
-        public void TestStaticLog4() {
-
+        public void TestLog() {
+            MetaLog.Logger.Log(MetaLog.LogSeverity.Error, "Testing basic text logging.");
         }
     }
 }
