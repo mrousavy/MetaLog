@@ -77,16 +77,14 @@ namespace MetaLog {
         /// (will increase by 4 each inner-exception)</param>
         /// <returns>A built tree of <see cref="Exception.InnerException"/>s</returns>
         public static string RecurseException(Exception exception, int indent = 0) {
-            string nl = Environment.NewLine;
-            string message = string.Empty;
-            if (indent == 0) message += $"Begin Exception Tree:{nl}";
+            //TODO: Use StringBuilder?
+            string stacktrace = exception.StackTrace.TrimStart(); //add stacktrace if existing
+            stacktrace = BuildTree(stacktrace, true);
 
-            message += $"{exception.GetType()}: {exception.Message}{nl}{exception.StackTrace}"; //construct message
+            string message = $"{exception.GetType()}: {exception.Message}{Nl}{stacktrace}{Nl}"; //construct message
 
             if (exception.InnerException != null) {
                 message += RecurseException(exception.InnerException, indent + 4);
-            } else {
-                message = BuildTree(message, indent > 0);
             }
 
             return message;
@@ -140,9 +138,11 @@ namespace MetaLog {
         /// subtree</param>
         /// <param name="isEnd">Indicating whether this is the
         /// last tree</param>
+        /// <param name="baseIndent">The amount of whitespaces
+        /// to indent every tree child</param>
         /// <returns>A built tree</returns>
-        public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true) {
-            string[] lines = input.Split(new[] {Environment.NewLine},
+        public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0) {
+            string[] lines = input.Split(new[] { Nl },
                 StringSplitOptions.RemoveEmptyEntries);
             string start = isSubtree ? SubTreeStart : TreeStart; //make ┬ or ┌ 
 
@@ -150,13 +150,12 @@ namespace MetaLog {
                 case 0:
                     return string.Empty;
                 case 1:
-                    return $"{SubTreeStart} {lines[0]}";
+                    return $"{HSpacer} {lines[0]}";
             }
-            
-            string nl = Environment.NewLine;
 
             string trimmed = lines[0].TrimStart(); //remove first whitespaces
-            string indent = new string(' ', lines[0].Length - trimmed.Length); //get original whitespace indent
+            int whitespacesCount = (lines[0].Length - trimmed.Length) + baseIndent; //number of whitespaces
+            string indent = new string(' ', whitespacesCount); //get original whitespace indent
 
             lines[0] = $"{indent}{start} {trimmed}";
 
@@ -166,12 +165,12 @@ namespace MetaLog {
 
             string result;
             if (isEnd) {
-                lines[lines.Length - 1] += $"{indent}{TreeEnd}{lines[lines.Length - 1]}";  //make └
-                result = string.Join(nl, lines);
+                lines[lines.Length - 1] = $"{indent}{TreeEnd} {lines[lines.Length - 1]}";  //make └
+                result = string.Join(Nl, lines);
             } else {
-                lines[lines.Length - 1] += $"{indent}{TreeItem}{lines[lines.Length - 1]}";  //make ├
-                result = string.Join(nl, lines);
-                result += $"{nl}{indent}{TreeEnd}{HSpacer}"; //make └─
+                lines[lines.Length - 1] = $"{indent}{TreeItem} {lines[lines.Length - 1]}";  //make ├
+                result = string.Join(Nl, lines);
+                result += $"{Nl}{indent}{TreeEnd}{HSpacer}"; //make └─
             }
             return result;
         }
