@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Dynamic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -21,7 +20,7 @@ namespace MetaLog {
         /// <summary>
         /// The <see cref="Encoding"/> this <see cref="ILogger"/> instance uses
         /// </summary>
-        private static Encoding Encoding { get; set; } = Encoding.Default;
+        private static readonly Encoding Encoding = Encoding.Unicode;
         /// <summary>
         /// The <see cref="FileStream"/> used for writing to the LogFile
         /// </summary>
@@ -84,6 +83,7 @@ namespace MetaLog {
                 if (LogFile != null && UseStream) { //open filestream if Path is not null and Logger uses streams
                     //create a new filestream to the LogFile (create if file does not exist, and seek to end)
                     FileStream = new FileStream(LogFile, FileMode.Append, FileAccess.Write);
+                    FileStream.Position = FileStream.Length; //set position to end
                 }
             }
         }
