@@ -74,13 +74,13 @@ namespace MetaLog {
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>
-        /// <param name="member">The calling member for this Log message</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         void Log(LogSeverity severity, string message,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0);
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
         ///     Log a new <see cref="Exception" /> tree (up to most
@@ -88,27 +88,27 @@ namespace MetaLog {
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="exception">An occured <see cref="Exception" /></param>
-        /// <param name="member">The calling member for this Log message</param>
         /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         void Log(LogSeverity severity, Exception exception, int indent = 2,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0);
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
         ///     Log a new message to the <see cref="LogFile" /> async
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>
-        /// <param name="member">The calling member for this Log message</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         Task LogAsync(LogSeverity severity, string message,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0);
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
         ///     Log a new <see cref="Exception" /> tree (up to most
@@ -116,13 +116,73 @@ namespace MetaLog {
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="exception">An occured <see cref="Exception" /></param>
-        /// <param name="member">The calling member for this Log message</param>
         /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0);
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
+
+        /// <summary>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Debug"/>
+        /// </summary>
+        /// <param name="message">The actual log-message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
+        void Debug(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
+
+        /// <summary>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Info"/>
+        /// </summary>
+        /// <param name="message">The actual log-message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
+        void Info(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
+
+        /// <summary>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Warning"/>
+        /// </summary>
+        /// <param name="message">The actual log-message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
+        void Warning(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
+
+        /// <summary>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Error"/>
+        /// </summary>
+        /// <param name="message">The actual log-message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
+        void Error(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
+
+        /// <summary>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Critical"/>
+        /// </summary>
+        /// <param name="message">The actual log-message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
+        void Critical(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
     }
 }
