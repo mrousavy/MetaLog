@@ -136,17 +136,17 @@ namespace MetaLog
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>
-        /// <param name="member">The calling member for this Log message</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         public static void Log(LogSeverity severity, string message,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0)
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0)
         {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
-            string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+            string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
 
             lock (Lock)
             {
@@ -168,14 +168,14 @@ namespace MetaLog
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="exception">An occured <see cref="Exception" /></param>
-        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
         /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         public static void Log(LogSeverity severity, Exception exception, int indent = 2,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0)
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0)
         {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
@@ -183,7 +183,7 @@ namespace MetaLog
             message = Utilities.BuildTree(message);
             message = Utilities.Indent(message, indent);
             message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
-            string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+            string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
 
             lock (Lock)
             {
@@ -206,13 +206,13 @@ namespace MetaLog
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>
-        /// <param name="member">The calling member for this Log message</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         public static async Task LogAsync(LogSeverity severity, string message,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0)
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0)
         {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
@@ -222,7 +222,7 @@ namespace MetaLog
             {
                 try
                 {
-                    string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+                    string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
 
                     lock (Lock)
                     {
@@ -253,14 +253,14 @@ namespace MetaLog
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="exception">An occured <see cref="Exception" /></param>
-        /// <param name="member">The calling member for this Log message</param>
+        /// <param name="callerMember">The calling member for this Log message</param>
         /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
-        /// <param name="file">The calling source file for this Log message</param>
-        /// <param name="line">The line number in the calling file for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
         public static async Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
-            [CallerFilePath] string file = null,
-            [CallerMemberName] string member = null,
-            [CallerLineNumber] int line = 0)
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0)
         {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
@@ -274,7 +274,7 @@ namespace MetaLog
                     message = Utilities.BuildTree(message);
                     message = Utilities.Indent(message, indent);
                     message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
-                    string text = Utilities.BuildMessage(severity, message, file, member, line); //construct the message
+                    string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
 
                     lock (Lock)
                     {
@@ -300,6 +300,37 @@ namespace MetaLog
 
             await tcs.Task;
         }
+
+
+        public static void Debug(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            Log(LogSeverity.Debug, message, callerFile, callerMember, callerLine);
+
+        public static void Info(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            Log(LogSeverity.Info, message, callerFile, callerMember, callerLine);
+
+        public static void Warning(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            Log(LogSeverity.Warning, message, callerFile, callerMember, callerLine);
+
+        public static void Error(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            Log(LogSeverity.Error, message, callerFile, callerMember, callerLine);
+
+        public static void Critical(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            Log(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
 
         #endregion
 

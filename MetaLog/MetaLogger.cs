@@ -58,7 +58,8 @@ namespace MetaLog
             get => _logFile;
             set
             {
-                if (value == _logFile) return; //don't reopen stream if it's same value
+                if (value == _logFile)
+                    return; //don't reopen stream if it's same value
                 _logFile = value;
                 ToggleStream();
             }
@@ -69,7 +70,8 @@ namespace MetaLog
             get => _useStream;
             set
             {
-                if (value == _useStream) return; //don't change stream if it's same value
+                if (value == _useStream)
+                    return; //don't change stream if it's same value
                 _useStream = value;
                 ToggleStream();
             }
@@ -83,7 +85,8 @@ namespace MetaLog
 
         private void ToggleStream()
         {
-            if (FileStream?.Name == LogFile) return; //no need to reopen stream if it's on our file
+            if (FileStream?.Name == LogFile)
+                return; //no need to reopen stream if it's on our file
 
             lock (Lock)
             {
@@ -117,7 +120,8 @@ namespace MetaLog
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0)
         {
-            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+            if (severity < MinimumSeverity)
+                return; //don't log if it's below min severity
 
             string text =
                 Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
@@ -141,7 +145,8 @@ namespace MetaLog
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0)
         {
-            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+            if (severity < MinimumSeverity)
+                return; //don't log if it's below min severity
 
             string message = Utilities.RecurseException(exception, 2); //build exception tree
             message = Utilities.BuildTree(message);
@@ -171,7 +176,8 @@ namespace MetaLog
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0)
         {
-            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+            if (severity < MinimumSeverity)
+                return; //don't log if it's below min severity
 
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
@@ -211,7 +217,8 @@ namespace MetaLog
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0)
         {
-            if (severity < MinimumSeverity) return; //don't log if it's below min severity
+            if (severity < MinimumSeverity)
+                return; //don't log if it's below min severity
 
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
@@ -252,20 +259,34 @@ namespace MetaLog
             await tcs.Task;
         }
 
-        public void Debug(string message, string callerFile = null, string callerMember = null, int callerLine = 0) =>
+        public void Debug(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Debug, message, callerFile, callerMember, callerLine);
 
-        public void Info(string message, string callerFile = null, string callerMember = null, int callerLine = 0) =>
+        public void Info(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Info, message, callerFile, callerMember, callerLine);
 
-        public void Warning(string message, string callerFile = null, string callerMember = null, int callerLine = 0) =>
+        public void Warning(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Warning, message, callerFile, callerMember, callerLine);
 
-        public void Error(string message, string callerFile = null, string callerMember = null, int callerLine = 0) =>
+        public void Error(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Error, message, callerFile, callerMember, callerLine);
 
-        public void Critical(string message, string callerFile = null, string callerMember = null,
-            int callerLine = 0) =>
+        public void Critical(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
 
         #endregion
