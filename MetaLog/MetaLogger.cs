@@ -2,7 +2,6 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 // ReSharper disable ExplicitCallerInfoArgument
@@ -115,6 +114,10 @@ namespace MetaLog
 
         #region Logging
 
+        //////////////////////////////////
+        //            LOGGER            //
+        //////////////////////////////////
+
         public void Log(LogSeverity severity, string message,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
@@ -125,19 +128,7 @@ namespace MetaLog
 
             string text =
                 Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
-
-            lock (Lock)
-            {
-                //lock to sync object to prevent inconsistency
-                if (UseStream)
-                {
-                    byte[] bytes = Encoding.GetBytes(text);
-                    FileStream.Write(bytes, 0, bytes.Length);
-                } else
-                {
-                    File.AppendAllText(LogFile, text);
-                }
-            }
+            WriteText(text);
         }
 
         public void Log(LogSeverity severity, Exception exception, int indent = 2,
@@ -154,7 +145,49 @@ namespace MetaLog
             message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
             string text =
                 Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
+            WriteText(text);
+        }
 
+        public Task LogAsync(LogSeverity severity, string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0)
+        {
+            if (severity < MinimumSeverity)
+                return Task.CompletedTask; //don't log if it's below min severity
+
+            return Task.Run(() =>
+            {
+                string text =
+                    Utilities.BuildMessage(severity, message, callerFile, callerMember,
+                        callerLine); //construct the message
+                WriteText(text);
+            });
+        }
+
+        public Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0)
+        {
+            if (severity < MinimumSeverity)
+                return Task.CompletedTask; //don't log if it's below min severity
+
+            return Task.Run(() =>
+            {
+                string message = Utilities.RecurseException(exception, 2); //build exception tree
+                message = Utilities.BuildTree(message);
+                message = Utilities.Indent(message, indent);
+                message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
+                string text =
+                    Utilities.BuildMessage(severity, message, callerFile, callerMember,
+                        callerLine); //construct the message
+                WriteText(text);
+            });
+        }
+
+        private void WriteText(string text)
+        {
             lock (Lock)
             {
                 //lock to sync object to prevent inconsistency
@@ -171,94 +204,9 @@ namespace MetaLog
             }
         }
 
-        public async Task LogAsync(LogSeverity severity, string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0)
-        {
-            if (severity < MinimumSeverity)
-                return; //don't log if it's below min severity
-
-            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-
-            new Thread(() =>
-            {
-                try
-                {
-                    string text =
-                        Utilities.BuildMessage(severity, message, callerFile, callerMember,
-                            callerLine); //construct the message
-
-                    lock (Lock)
-                    {
-                        //lock to sync object to prevent inconsistency
-                        if (UseStream)
-                        {
-                            byte[] bytes = Encoding.GetBytes(text);
-                            FileStream.Write(bytes, 0, bytes.Length);
-                        } else
-                        {
-                            File.AppendAllText(LogFile, text);
-                        }
-                    }
-
-                    tcs.SetResult(true);
-                } catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                }
-            }).Start();
-
-            await tcs.Task;
-        }
-
-        public async Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0)
-        {
-            if (severity < MinimumSeverity)
-                return; //don't log if it's below min severity
-
-            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-
-            new Thread(() =>
-            {
-                try
-                {
-                    string message = Utilities.RecurseException(exception, 2); //build exception tree
-                    message = Utilities.BuildTree(message);
-                    message = Utilities.Indent(message, indent);
-                    message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
-                    string text =
-                        Utilities.BuildMessage(severity, message, callerFile, callerMember,
-                            callerLine); //construct the message
-
-                    lock (Lock)
-                    {
-                        //lock to sync object to prevent inconsistency
-                        if (UseStream)
-                        {
-                            //write via filestream
-                            byte[] bytes = Encoding.GetBytes(text);
-                            FileStream.Write(bytes, 0, bytes.Length);
-                        } else
-                        {
-                            //write via Sytem.IO.File helper
-                            File.AppendAllText(LogFile, text);
-                        }
-                    }
-
-                    tcs.SetResult(true);
-                } catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                }
-            }).Start();
-
-            await tcs.Task;
-        }
-
+        //////////////////////////////////
+        //    DIRECT-SEVERITY-LOGGER    //
+        //////////////////////////////////
         public void Debug(string message,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
@@ -288,6 +236,40 @@ namespace MetaLog
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
+
+
+        //////////////////////////////////
+        // ASYNC DIRECT-SEVERITY-LOGGER //
+        //////////////////////////////////
+        public Task DebugAsync(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            LogAsync(LogSeverity.Debug, message, callerFile, callerMember, callerLine);
+
+        public Task InfoAsync(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            LogAsync(LogSeverity.Info, message, callerFile, callerMember, callerLine);
+
+        public Task WarningAsync(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            LogAsync(LogSeverity.Warning, message, callerFile, callerMember, callerLine);
+
+        public Task ErrorAsync(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            LogAsync(LogSeverity.Error, message, callerFile, callerMember, callerLine);
+
+        public Task CriticalAsync(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            LogAsync(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
 
         #endregion
     }
