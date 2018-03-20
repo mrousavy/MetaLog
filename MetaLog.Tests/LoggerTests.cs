@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace MetaLog.Tests {
+namespace MetaLog.Tests
+{
     [TestClass]
-    public class LoggerTests {
+    public class LoggerTests
+    {
         public static ILogger Logger;
 
         public static string LogDir = Path.Combine(
@@ -15,48 +16,58 @@ namespace MetaLog.Tests {
         public static string LogFile = Path.Combine(LogDir, "log.log");
 
         [TestInitialize]
-        public void Init() {
+        public void Init()
+        {
             if (!Directory.Exists(LogDir)) Directory.CreateDirectory(LogDir);
             Logger = MetaLog.Logger.New(LogFile, LogSeverity.Info, true);
         }
 
         [TestCleanup]
-        public void Cleanup() {
+        public void Cleanup()
+        {
             Logger.Dispose();
         }
 
         [TestMethod]
-        public void TestThrowExceptionLog() {
-            Logger.Log(MetaLog.LogSeverity.Info, "Starting Exception-Log Test.");
-            try {
+        public void TestThrowExceptionLog()
+        {
+            Logger.Log(LogSeverity.Info, "Starting Exception-Log Test.");
+            try
+            {
                 throw Helper.BuildException();
-            } catch (Exception ex) {
-                Logger.Log(MetaLog.LogSeverity.Error, ex);
+            } catch (Exception ex)
+            {
+                Logger.Log(LogSeverity.Error, ex);
             }
-            Logger.Log(MetaLog.LogSeverity.Info, "Exception-Log Test is about to finish.");
+
+            Logger.Log(LogSeverity.Info, "Exception-Log Test is about to finish.");
         }
 
         [TestMethod]
-        public void TestExceptionLog() {
+        public void TestExceptionLog()
+        {
             var ex = new Exception("Exception message.");
-            Logger.Log(MetaLog.LogSeverity.Error, ex);
+            Logger.Log(LogSeverity.Error, ex);
         }
 
         [TestMethod]
-        public void TestExceptionLogAsync() {
+        public void TestExceptionLogAsync()
+        {
             var ex = new Exception("Exception message.");
-            Task task = Logger.LogAsync(MetaLog.LogSeverity.Error, ex);
+            var task = Logger.LogAsync(LogSeverity.Error, ex);
             task.GetAwaiter().GetResult();
         }
 
         [TestMethod]
-        public void TestLog() {
-            Logger.Log(MetaLog.LogSeverity.Error, "Testing basic text logging.");
+        public void TestLog()
+        {
+            Logger.Log(LogSeverity.Error, "Testing basic text logging.");
         }
 
         [TestMethod]
-        public void TestLogAsync() {
-            Task task = Logger.LogAsync(MetaLog.LogSeverity.Error, "Testing basic text logging.");
+        public void TestLogAsync()
+        {
+            var task = Logger.LogAsync(LogSeverity.Error, "Testing basic text logging.");
             task.GetAwaiter().GetResult();
         }
     }

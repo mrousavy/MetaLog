@@ -4,10 +4,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 // ReSharper disable ExplicitCallerInfoArgument
 
-namespace MetaLog {
-    public class MetaLogger : ILogger {
+namespace MetaLog
+{
+    public class MetaLogger : ILogger
+    {
         private string _logFile = Path.Combine(Utilities.MetaLogAppData, $"{Utilities.ExecutingAssemblyName}.log");
         private bool _useStream;
 
@@ -17,14 +20,16 @@ namespace MetaLog {
         ///     Create a new MetaLogger with the given filename
         /// </summary>
         /// <param name="filename">The LogFile</param>
-        public MetaLogger(string filename) : this(filename, LogSeverity.Info, false) { }
+        public MetaLogger(string filename) : this(filename, LogSeverity.Info, false)
+        { }
 
         /// <summary>
         ///     Create a new MetaLogger with the given filename
         /// </summary>
         /// <param name="filename">The LogFile</param>
         /// <param name="minSeverity">The LogFile</param>
-        public MetaLogger(string filename, LogSeverity minSeverity) : this(filename, minSeverity, false) { }
+        public MetaLogger(string filename, LogSeverity minSeverity) : this(filename, minSeverity, false)
+        { }
 
         /// <summary>
         ///     Create a new MetaLogger with the given filename
@@ -32,7 +37,8 @@ namespace MetaLog {
         /// <param name="filename">The LogFile</param>
         /// <param name="minSeverity">The LogFile</param>
         /// <param name="useStream">The LogFile</param>
-        public MetaLogger(string filename, LogSeverity minSeverity, bool useStream) {
+        public MetaLogger(string filename, LogSeverity minSeverity, bool useStream)
+        {
             LogFile = filename;
             MinimumSeverity = minSeverity;
             UseStream = useStream;
@@ -47,18 +53,22 @@ namespace MetaLog {
 
         public Encoding Encoding { get; set; } = Encoding.Unicode;
 
-        public string LogFile {
+        public string LogFile
+        {
             get => _logFile;
-            set {
+            set
+            {
                 if (value == _logFile) return; //don't reopen stream if it's same value
                 _logFile = value;
                 ToggleStream();
             }
         }
 
-        public bool UseStream {
+        public bool UseStream
+        {
             get => _useStream;
-            set {
+            set
+            {
                 if (value == _useStream) return; //don't change stream if it's same value
                 _useStream = value;
                 ToggleStream();
@@ -71,13 +81,16 @@ namespace MetaLog {
 
         #region Functions
 
-        private void ToggleStream() {
+        private void ToggleStream()
+        {
             if (FileStream?.Name == LogFile) return; //no need to reopen stream if it's on our file
 
-            lock (Lock) {
+            lock (Lock)
+            {
                 //lock to our lock object so we don't close a stream mid-write
                 FileStream?.Dispose(); //dispose the stream if open
-                if (LogFile != null && UseStream) {
+                if (LogFile != null && UseStream)
+                {
                     //open filestream if Path is not null and Logger uses streams
                     //create a new filestream to the LogFile (create if file does not exist, and seek to end)
                     FileStream = new FileStream(LogFile, FileMode.Append, FileAccess.Write);
@@ -86,8 +99,10 @@ namespace MetaLog {
             }
         }
 
-        public void Dispose() {
-            lock (Lock) {
+        public void Dispose()
+        {
+            lock (Lock)
+            {
                 //lock so we don't interrupt a FileStream's write op
                 FileStream?.Dispose();
             }
@@ -100,17 +115,22 @@ namespace MetaLog {
         public void Log(LogSeverity severity, string message,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) {
+            [CallerLineNumber] int callerLine = 0)
+        {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
-            string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
+            string text =
+                Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
 
-            lock (Lock) {
+            lock (Lock)
+            {
                 //lock to sync object to prevent inconsistency
-                if (UseStream) {
+                if (UseStream)
+                {
                     byte[] bytes = Encoding.GetBytes(text);
                     FileStream.Write(bytes, 0, bytes.Length);
-                } else {
+                } else
+                {
                     File.AppendAllText(LogFile, text);
                 }
             }
@@ -119,22 +139,27 @@ namespace MetaLog {
         public void Log(LogSeverity severity, Exception exception, int indent = 2,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) {
+            [CallerLineNumber] int callerLine = 0)
+        {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
             string message = Utilities.RecurseException(exception, 2); //build exception tree
             message = Utilities.BuildTree(message);
             message = Utilities.Indent(message, indent);
             message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
-            string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
+            string text =
+                Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
 
-            lock (Lock) {
+            lock (Lock)
+            {
                 //lock to sync object to prevent inconsistency
-                if (UseStream) {
+                if (UseStream)
+                {
                     //write via filestream
                     byte[] bytes = Encoding.GetBytes(text);
                     FileStream.Write(bytes, 0, bytes.Length);
-                } else {
+                } else
+                {
                     //write via Sytem.IO.File helper
                     File.AppendAllText(LogFile, text);
                 }
@@ -144,26 +169,36 @@ namespace MetaLog {
         public async Task LogAsync(LogSeverity severity, string message,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) {
+            [CallerLineNumber] int callerLine = 0)
+        {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
-            new Thread(() => {
-                try {
-                    string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
+            new Thread(() =>
+            {
+                try
+                {
+                    string text =
+                        Utilities.BuildMessage(severity, message, callerFile, callerMember,
+                            callerLine); //construct the message
 
-                    lock (Lock) {
+                    lock (Lock)
+                    {
                         //lock to sync object to prevent inconsistency
-                        if (UseStream) {
+                        if (UseStream)
+                        {
                             byte[] bytes = Encoding.GetBytes(text);
                             FileStream.Write(bytes, 0, bytes.Length);
-                        } else {
+                        } else
+                        {
                             File.AppendAllText(LogFile, text);
                         }
                     }
+
                     tcs.SetResult(true);
-                } catch (Exception ex) {
+                } catch (Exception ex)
+                {
                     tcs.SetException(ex);
                 }
             }).Start();
@@ -174,32 +209,42 @@ namespace MetaLog {
         public async Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) {
+            [CallerLineNumber] int callerLine = 0)
+        {
             if (severity < MinimumSeverity) return; //don't log if it's below min severity
 
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
-            new Thread(() => {
-                try {
+            new Thread(() =>
+            {
+                try
+                {
                     string message = Utilities.RecurseException(exception, 2); //build exception tree
                     message = Utilities.BuildTree(message);
                     message = Utilities.Indent(message, indent);
                     message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
-                    string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
+                    string text =
+                        Utilities.BuildMessage(severity, message, callerFile, callerMember,
+                            callerLine); //construct the message
 
-                    lock (Lock) {
+                    lock (Lock)
+                    {
                         //lock to sync object to prevent inconsistency
-                        if (UseStream) {
+                        if (UseStream)
+                        {
                             //write via filestream
                             byte[] bytes = Encoding.GetBytes(text);
                             FileStream.Write(bytes, 0, bytes.Length);
-                        } else {
+                        } else
+                        {
                             //write via Sytem.IO.File helper
                             File.AppendAllText(LogFile, text);
                         }
                     }
+
                     tcs.SetResult(true);
-                } catch (Exception ex) {
+                } catch (Exception ex)
+                {
                     tcs.SetException(ex);
                 }
             }).Start();
@@ -219,7 +264,8 @@ namespace MetaLog {
         public void Error(string message, string callerFile = null, string callerMember = null, int callerLine = 0) =>
             Log(LogSeverity.Error, message, callerFile, callerMember, callerLine);
 
-        public void Critical(string message, string callerFile = null, string callerMember = null, int callerLine = 0) =>
+        public void Critical(string message, string callerFile = null, string callerMember = null,
+            int callerLine = 0) =>
             Log(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
 
         #endregion

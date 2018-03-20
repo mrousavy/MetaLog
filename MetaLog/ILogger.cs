@@ -4,11 +4,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MetaLog {
+namespace MetaLog
+{
     /// <summary>
     ///     A MetaLog logging severity enum
     /// </summary>
-    public enum LogSeverity {
+    public enum LogSeverity
+    {
         /// <summary>
         ///     Indicating the log-message is for debugging
         /// </summary>
@@ -42,7 +44,8 @@ namespace MetaLog {
     /// <summary>
     ///     A MetaLog logger
     /// </summary>
-    public interface ILogger : IDisposable {
+    public interface ILogger : IDisposable
+    {
         /// <summary>
         ///     The <see cref="Encoding" /> this <see cref="ILogger" /> instance uses
         /// </summary>
@@ -126,7 +129,7 @@ namespace MetaLog {
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Debug"/>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Debug" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -138,7 +141,7 @@ namespace MetaLog {
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Info"/>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Info" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -150,7 +153,7 @@ namespace MetaLog {
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Warning"/>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Warning" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -162,7 +165,7 @@ namespace MetaLog {
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Error"/>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Error" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -174,7 +177,7 @@ namespace MetaLog {
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Critical"/>
+        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Critical" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>

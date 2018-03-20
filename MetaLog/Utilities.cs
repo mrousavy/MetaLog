@@ -3,8 +3,10 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 
-namespace MetaLog {
-    public static class Utilities {
+namespace MetaLog
+{
+    public static class Utilities
+    {
         private const string TreeStart = "┌";
         private const string TreeItem = "├";
         private const string TreeEnd = "└";
@@ -24,8 +26,10 @@ namespace MetaLog {
         /// <summary>
         ///     Path to %appdata%/MetaLog
         /// </summary>
-        public static string MetaLogAppData {
-            get {
+        public static string MetaLogAppData
+        {
+            get
+            {
                 string path = Path.Combine(AppData, "MetaLog");
                 if (!Directory.Exists(path)) Directory.CreateDirectory(path);
                 return path;
@@ -35,8 +39,10 @@ namespace MetaLog {
         /// <summary>
         ///     Get the Assembly this MetaLogger is called by
         /// </summary>
-        public static string ExecutingAssemblyName {
-            get {
+        public static string ExecutingAssemblyName
+        {
+            get
+            {
                 var execAssembly = Assembly.GetExecutingAssembly();
                 return execAssembly?.GetName()?.Name ?? "MetaLog"; //return caller name or "MetaLog"
             }
@@ -47,7 +53,8 @@ namespace MetaLog {
         /// </summary>
         /// <returns>The built log message</returns>
         internal static string BuildMessage(LogSeverity severity, string text, string callerFile, string callerMember,
-            int callerLine) {
+            int callerLine)
+        {
             string time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
             string file = Path.GetFileNameWithoutExtension(callerFile);
 
@@ -66,7 +73,8 @@ namespace MetaLog {
         /// <param name="input">The input string</param>
         /// <param name="length">The length for this string to be</param>
         /// <returns></returns>
-        private static string BringOnSameLength(string input, int length) {
+        private static string BringOnSameLength(string input, int length)
+        {
             if (input.Length >= length) return input; //return on wrong input
 
             string spaces = new string(' ', length - input.Length);
@@ -85,7 +93,8 @@ namespace MetaLog {
         ///     A custom character to use
         ///     for censoring
         /// </param>
-        public static string Censor(string text, double censorPercent = 0.4, char censorChar = '•') {
+        public static string Censor(string text, double censorPercent = 0.4, char censorChar = '•')
+        {
             int length = text.Length;
             int toCensor = (int) Math.Floor(length * censorPercent);
             string censored = text.Substring(0, toCensor) + new string(censorChar, length - toCensor);
@@ -102,10 +111,12 @@ namespace MetaLog {
         ///     (will increase by 4 each inner-exception)
         /// </param>
         /// <returns>A built tree of <see cref="Exception.InnerException" />s</returns>
-        public static string RecurseException(Exception exception, int indent = 0) {
+        public static string RecurseException(Exception exception, int indent = 0)
+        {
             //TODO: Use StringBuilder?
             string stacktrace = string.Empty;
-            if (exception.StackTrace != null) {
+            if (exception.StackTrace != null)
+            {
                 stacktrace = exception.StackTrace.TrimStart(); //add stacktrace if existing
                 stacktrace = BuildTree(stacktrace, true) + Nl;
             }
@@ -122,12 +133,14 @@ namespace MetaLog {
         /// </summary>
         /// <param name="text">The input text</param>
         /// <param name="amount">The amount of whitespaces to indent</param>
-        public static string Indent(string text, int amount) {
+        public static string Indent(string text, int amount)
+        {
             string indent = new string(' ', amount);
             string[] lines = text.Split(new[] {Nl},
                 StringSplitOptions.RemoveEmptyEntries);
 
-            for (int i = 0; i < lines.Length; i++) {
+            for (int i = 0; i < lines.Length; i++)
+            {
                 lines[i] = $"{indent}{lines[i]}";
                 if (i != lines.Length - 1)
                     lines[i] += Nl; //add \n to every but last line
@@ -141,7 +154,8 @@ namespace MetaLog {
         ///     Resest the indent of all lines of the given text
         /// </summary>
         /// <param name="text">The input text</param>
-        public static string ResetIndent(string text) {
+        public static string ResetIndent(string text)
+        {
             string[] lines = text.Split(new[] {Nl},
                 StringSplitOptions.RemoveEmptyEntries);
 
@@ -178,12 +192,14 @@ namespace MetaLog {
         ///     to indent every tree child
         /// </param>
         /// <returns>A built tree</returns>
-        public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0) {
+        public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0)
+        {
             string[] lines = input.Split(new[] {Nl},
                 StringSplitOptions.RemoveEmptyEntries);
             string start = isSubtree ? SubTreeStart : TreeStart; //make ┬ or ┌ 
 
-            switch (lines.Length) {
+            switch (lines.Length)
+            {
                 case 0:
                     return string.Empty;
                 case 1:
@@ -199,14 +215,17 @@ namespace MetaLog {
             for (int i = 1; i < lines.Length - 1; i++) lines[i] = $"{indent}{TreeItem} {lines[i]}"; //make ├ {line}
 
             string result;
-            if (isEnd) {
+            if (isEnd)
+            {
                 lines[lines.Length - 1] = $"{indent}{TreeEnd} {lines[lines.Length - 1]}"; //make └
                 result = string.Join(Nl, lines);
-            } else {
+            } else
+            {
                 lines[lines.Length - 1] = $"{indent}{TreeItem} {lines[lines.Length - 1]}"; //make ├
                 result = string.Join(Nl, lines);
                 result += $"{Nl}{indent}{TreeEnd}{HSpacer}"; //make └─
             }
+
             return result;
         }
     }
