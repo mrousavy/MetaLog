@@ -25,6 +25,7 @@ using MetaLog;
 ILogger logger = Logger.New("C:\\Users\\mrousavy\\Documents\\log.log", LogSeverity.Info);
 
 logger.Log(LogSeverity.Info, "Logged in as mrousavy, version 1.0!");
+// or: logger.Info(..);
 
 /// Output (log.log):
 /// [Info] [2017-09-01 20:37:02.755] [StaticTests.CustomTest:16]: Logged in as mrousavy, version 1.0!
