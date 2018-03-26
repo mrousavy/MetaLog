@@ -52,7 +52,7 @@ namespace MetaLog
         Encoding Encoding { get; set; }
 
         /// <summary>
-        ///     The <see cref="Stream"/> this <see cref="ILogger"/> instance writes to
+        ///     The <see cref="Stream" /> this <see cref="ILogger" /> instance writes to
         /// </summary>
         Stream Stream { get; set; }
 
@@ -78,7 +78,7 @@ namespace MetaLog
 
         /// <summary>
         ///     Log a new <see cref="Exception" /> tree (up to most
-        ///     inner <see cref="Exception" />) to the <see cref="LogFile" />
+        ///     inner <see cref="Exception" />) to the <see cref="Stream" />
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="exception">An occured <see cref="Exception" /></param>
@@ -92,7 +92,7 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> async
+        ///     Log a new message to the <see cref="Stream" /> async
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>
@@ -106,7 +106,7 @@ namespace MetaLog
 
         /// <summary>
         ///     Log a new <see cref="Exception" /> tree (up to most
-        ///     inner <see cref="Exception" />) to the <see cref="LogFile" /> async
+        ///     inner <see cref="Exception" />) to the <see cref="Stream" /> async
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="exception">An occured <see cref="Exception" /></param>
@@ -120,7 +120,7 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Debug" />
+        ///     Log a new message to the <see cref="Stream" /> of severity <see cref="LogSeverity.Debug" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -132,7 +132,7 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Info" />
+        ///     Log a new message to the <see cref="Stream" /> of severity <see cref="LogSeverity.Info" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -144,7 +144,7 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Warning" />
+        ///     Log a new message to the <see cref="Stream" /> of severity <see cref="LogSeverity.Warning" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -156,7 +156,7 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Error" />
+        ///     Log a new message to the <see cref="Stream" /> of severity <see cref="LogSeverity.Error" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
@@ -168,13 +168,39 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0);
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" /> of severity <see cref="LogSeverity.Critical" />
+        ///     Log a new <see cref="Exception" /> tree (up to most
+        ///     inner <see cref="Exception" />) to the <see cref="Stream" /> of severity <see cref="LogSeverity.Error" />
+        /// </summary>
+        /// <param name="exception">An occured <see cref="Exception" /></param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
+        void Error(Exception exception,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
+
+        /// <summary>
+        ///     Log a new message to the <see cref="Stream" /> of severity <see cref="LogSeverity.Critical" />
         /// </summary>
         /// <param name="message">The actual log-message</param>
         /// <param name="callerMember">The calling member for this Log message</param>
         /// <param name="callerFile">The calling source file for this Log message</param>
         /// <param name="callerLine">The line number in the calling file for this Log message</param>
         void Critical(string message,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0);
+
+        /// <summary>
+        ///     Log a new <see cref="Exception" /> tree (up to most
+        ///     inner <see cref="Exception" />) to the <see cref="Stream" /> of severity <see cref="LogSeverity.Critical" />
+        /// </summary>
+        /// <param name="exception">An occured <see cref="Exception" /></param>
+        /// <param name="callerMember">The calling member for this Log message</param>
+        /// <param name="callerFile">The calling source file for this Log message</param>
+        /// <param name="callerLine">The line number in the calling file for this Log message</param>
+        void Critical(Exception exception,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0);

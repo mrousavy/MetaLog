@@ -10,6 +10,21 @@ namespace MetaLog
 {
     public class MetaLogger : ILogger
     {
+        #region Functions
+
+        public void Dispose()
+        {
+            if (!_closeStream)
+                return;
+
+            lock (Lock)
+            {
+                // lock so we don't interrupt a FileStream's write op
+                Stream?.Dispose();
+            }
+        }
+
+        #endregion
 
         #region ctor
 
@@ -17,7 +32,7 @@ namespace MetaLog
         ///     Create a new MetaLogger with the given filename
         /// </summary>
         /// <param name="logFile">The file to log to</param>
-        public MetaLogger(string logFile) 
+        public MetaLogger(string logFile)
             : this(logFile, LogSeverity.Info)
         {
             _closeStream = true;
@@ -40,7 +55,7 @@ namespace MetaLog
         /// <param name="logFile">The file to log to</param>
         /// <param name="minSeverity">The minimum severity to log messages to</param>
         /// <param name="encoding">The encoding to use for writing strings</param>
-        public MetaLogger(string logFile, LogSeverity minSeverity, Encoding encoding) 
+        public MetaLogger(string logFile, LogSeverity minSeverity, Encoding encoding)
             : this(new FileStream(logFile, FileMode.OpenOrCreate), minSeverity, encoding)
         {
             _closeStream = true;
@@ -71,7 +86,7 @@ namespace MetaLog
         /// <param name="encoding">The encoding to use for writing strings</param>
         public MetaLogger(Stream stream, LogSeverity minSeverity, Encoding encoding)
         {
-            if(stream == null || !stream.CanWrite)
+            if (stream == null || !stream.CanWrite)
                 throw new ArgumentException(nameof(stream));
 
             Stream = stream;
@@ -95,21 +110,6 @@ namespace MetaLog
         public Encoding Encoding { get; set; }
 
         public LogSeverity MinimumSeverity { get; set; }
-
-        #endregion
-
-        #region Functions
-
-        public void Dispose()
-        {
-            if (!_closeStream) return;
-
-            lock (Lock)
-            {
-                // lock so we don't interrupt a FileStream's write op
-                Stream?.Dispose();
-            }
-        }
 
         #endregion
 
@@ -226,11 +226,23 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Error, message, callerFile, callerMember, callerLine);
 
+        public void Error(Exception exception,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            Log(LogSeverity.Error, exception, 2, callerFile, callerMember, callerLine);
+
         public void Critical(string message,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0) =>
             Log(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
+
+        public void Critical(Exception exception,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            Log(LogSeverity.Critical, exception, 2, callerFile, callerMember, callerLine);
 
 
         //////////////////////////////////
@@ -260,11 +272,23 @@ namespace MetaLog
             [CallerLineNumber] int callerLine = 0) =>
             LogAsync(LogSeverity.Error, message, callerFile, callerMember, callerLine);
 
+        public Task ErrorAsync(Exception exception,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            LogAsync(LogSeverity.Error, exception, 2, callerFile, callerMember, callerLine);
+
         public Task CriticalAsync(string message,
             [CallerFilePath] string callerFile = null,
             [CallerMemberName] string callerMember = null,
             [CallerLineNumber] int callerLine = 0) =>
             LogAsync(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
+
+        public Task CriticalAsync(Exception exception,
+            [CallerFilePath] string callerFile = null,
+            [CallerMemberName] string callerMember = null,
+            [CallerLineNumber] int callerLine = 0) =>
+            LogAsync(LogSeverity.Critical, exception, 2, callerFile, callerMember, callerLine);
 
         #endregion
     }
