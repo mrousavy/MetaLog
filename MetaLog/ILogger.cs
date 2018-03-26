@@ -52,18 +52,9 @@ namespace MetaLog
         Encoding Encoding { get; set; }
 
         /// <summary>
-        ///     The log file this <see cref="ILogger" /> instance logs to
+        ///     The <see cref="Stream"/> this <see cref="ILogger"/> instance writes to
         /// </summary>
-        string LogFile { get; set; }
-
-        /// <summary>
-        ///     Whether this <see cref="ILogger" /> uses a single
-        ///     (File)-<see cref="Stream" /> for logging, or opens new
-        ///     ones each log. (<see cref="Stream" />s may be faster, but
-        ///     locks the file until the <see cref="ILogger" /> gets disposed, see:
-        ///     <see href="https://en.wikipedia.org/wiki/File_locking">file locking</see>)
-        /// </summary>
-        bool UseStream { get; set; }
+        Stream Stream { get; set; }
 
         /// <summary>
         ///     The minimum <see cref="LogSeverity" /> to log by this Logger instance
@@ -73,7 +64,7 @@ namespace MetaLog
         LogSeverity MinimumSeverity { get; set; }
 
         /// <summary>
-        ///     Log a new message to the <see cref="LogFile" />
+        ///     Log a new message to the log stream
         /// </summary>
         /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
         /// <param name="message">The actual log-message</param>

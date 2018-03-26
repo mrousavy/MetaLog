@@ -10,71 +10,89 @@ namespace MetaLog
 {
     public class MetaLogger : ILogger
     {
-        private string _logFile = Path.Combine(Utilities.MetaLogAppData, $"{Utilities.ExecutingAssemblyName}.log");
-        private bool _useStream;
 
         #region ctor
 
         /// <summary>
         ///     Create a new MetaLogger with the given filename
         /// </summary>
-        /// <param name="filename">The LogFile</param>
-        public MetaLogger(string filename) : this(filename, LogSeverity.Info, false)
-        { }
-
-        /// <summary>
-        ///     Create a new MetaLogger with the given filename
-        /// </summary>
-        /// <param name="filename">The LogFile</param>
-        /// <param name="minSeverity">The LogFile</param>
-        public MetaLogger(string filename, LogSeverity minSeverity) : this(filename, minSeverity, false)
-        { }
-
-        /// <summary>
-        ///     Create a new MetaLogger with the given filename
-        /// </summary>
-        /// <param name="filename">The LogFile</param>
-        /// <param name="minSeverity">The LogFile</param>
-        /// <param name="useStream">The LogFile</param>
-        public MetaLogger(string filename, LogSeverity minSeverity, bool useStream)
+        /// <param name="logFile">The file to log to</param>
+        public MetaLogger(string logFile) 
+            : this(logFile, LogSeverity.Info)
         {
-            LogFile = filename;
-            MinimumSeverity = minSeverity;
-            UseStream = useStream;
+            _closeStream = true;
         }
+
+        /// <summary>
+        ///     Create a new MetaLogger with the given filename
+        /// </summary>
+        /// <param name="logFile">The file to log to</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
+        public MetaLogger(string logFile, LogSeverity minSeverity)
+            : this(new FileStream(logFile, FileMode.OpenOrCreate), minSeverity, Encoding.Unicode)
+        {
+            _closeStream = true;
+        }
+
+        /// <summary>
+        ///     Create a new MetaLogger with the given filename
+        /// </summary>
+        /// <param name="logFile">The file to log to</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
+        /// <param name="encoding">The encoding to use for writing strings</param>
+        public MetaLogger(string logFile, LogSeverity minSeverity, Encoding encoding) 
+            : this(new FileStream(logFile, FileMode.OpenOrCreate), minSeverity, encoding)
+        {
+            _closeStream = true;
+        }
+
+        /// <summary>
+        ///     Create a new MetaLogger with the given stream to write to
+        /// </summary>
+        /// <param name="stream">The stream to log to</param>
+        public MetaLogger(Stream stream)
+            : this(stream, LogSeverity.Info)
+        { }
+
+        /// <summary>
+        ///     Create a new MetaLogger with the given stream to write to
+        /// </summary>
+        /// <param name="stream">The stream to log to</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
+        public MetaLogger(Stream stream, LogSeverity minSeverity)
+            : this(stream, minSeverity, Encoding.Unicode)
+        { }
+
+        /// <summary>
+        ///     Create a new MetaLogger with the given stream to write to
+        /// </summary>
+        /// <param name="stream">The stream to log to</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
+        /// <param name="encoding">The encoding to use for writing strings</param>
+        public MetaLogger(Stream stream, LogSeverity minSeverity, Encoding encoding)
+        {
+            if(stream == null || !stream.CanWrite)
+                throw new ArgumentException(nameof(stream));
+
+            Stream = stream;
+            MinimumSeverity = minSeverity;
+            Encoding = encoding ?? throw new ArgumentException(nameof(encoding));
+        }
+
+        #endregion
+
+        #region Privates
+
+        private readonly bool _closeStream;
+        private object Lock { get; } = new object();
 
         #endregion
 
         #region Properties
 
-        private object Lock { get; } = new object();
-        private FileStream FileStream { get; set; }
+        public Stream Stream { get; set; }
 
-        public Encoding Encoding { get; set; } = Encoding.Unicode;
-
-        public string LogFile
-        {
-            get => _logFile;
-            set
-            {
-                if (value == _logFile)
-                    return; //don't reopen stream if it's same value
-                _logFile = value;
-                ToggleStream();
-            }
-        }
-
-        public bool UseStream
-        {
-            get => _useStream;
-            set
-            {
-                if (value == _useStream)
-                    return; //don't change stream if it's same value
-                _useStream = value;
-                ToggleStream();
-            }
-        }
+        public Encoding Encoding { get; set; }
 
         public LogSeverity MinimumSeverity { get; set; }
 
@@ -82,31 +100,14 @@ namespace MetaLog
 
         #region Functions
 
-        private void ToggleStream()
-        {
-            if (FileStream?.Name == LogFile)
-                return; //no need to reopen stream if it's on our file
-
-            lock (Lock)
-            {
-                //lock to our lock object so we don't close a stream mid-write
-                FileStream?.Dispose(); //dispose the stream if open
-                if (LogFile != null && UseStream)
-                {
-                    //open filestream if Path is not null and Logger uses streams
-                    //create a new filestream to the LogFile (create if file does not exist, and seek to end)
-                    FileStream = new FileStream(LogFile, FileMode.Append, FileAccess.Write);
-                    FileStream.Position = FileStream.Length; //set position to end
-                }
-            }
-        }
-
         public void Dispose()
         {
+            if (!_closeStream) return;
+
             lock (Lock)
             {
-                //lock so we don't interrupt a FileStream's write op
-                FileStream?.Dispose();
+                // lock so we don't interrupt a FileStream's write op
+                Stream?.Dispose();
             }
         }
 
@@ -190,17 +191,9 @@ namespace MetaLog
         {
             lock (Lock)
             {
-                //lock to sync object to prevent inconsistency
-                if (UseStream)
-                {
-                    //write via filestream
-                    byte[] bytes = Encoding.GetBytes(text);
-                    FileStream.Write(bytes, 0, bytes.Length);
-                } else
-                {
-                    //write via Sytem.IO.File helper
-                    File.AppendAllText(LogFile, text);
-                }
+                // lock to sync object to prevent inconsistency
+                byte[] bytes = Encoding.GetBytes(text);
+                Stream.Write(bytes, 0, bytes.Length);
             }
         }
 

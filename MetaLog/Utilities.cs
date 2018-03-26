@@ -14,17 +14,22 @@ namespace MetaLog
         private const string HSpacer = "─";
 
         /// <summary>
-        ///     The new line character. Default: \n, May be <see cref="Environment.NewLine" />
+        ///     Get the recommended log file path for this executing assembly (<code>%AppData%/MetaLog/YourProject.log</code>)
         /// </summary>
-        public static string Nl { get; set; } = "\n"; //Environment.NewLine ?
+        public static string RecommendedLogFile => Path.Combine(MetaLogAppData, $"{ExecutingAssemblyName}.log");
 
         /// <summary>
-        ///     Path to %appdata%
+        ///     The new line character (<see cref="Environment.NewLine" />)
+        /// </summary>
+        public static string Nl { get; set; } = Environment.NewLine;
+
+        /// <summary>
+        ///     Path to %AppData%
         /// </summary>
         public static string AppData { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
         /// <summary>
-        ///     Path to %appdata%/MetaLog
+        ///     Path to %AppData%/MetaLog
         /// </summary>
         public static string MetaLogAppData
         {
@@ -60,9 +65,9 @@ namespace MetaLog
 
             string strSeverity = $"[{severity}]";
             strSeverity =
-                BringOnSameLength(strSeverity, 10); //Longest Severity ("Critical": 8) + brackets "[": 1 & "]": 1 = 10
+                BringOnSameLength(strSeverity, 10); // Longest Severity ("Critical": 8) + brackets "[": 1 & "]": 1 = 10
             string strMemberInfo = $"[{file}.{callerMember}:{callerLine}]:";
-            strMemberInfo = BringOnSameLength(strMemberInfo, 40); //unknown, just guess 20
+            strMemberInfo = BringOnSameLength(strMemberInfo, 40); // unknown, just guess 40
 
             return $"{strSeverity} [{time}] {strMemberInfo} {text}{Nl}";
         }
@@ -75,7 +80,7 @@ namespace MetaLog
         /// <returns></returns>
         private static string BringOnSameLength(string input, int length)
         {
-            if (input.Length >= length) return input; //return on wrong input
+            if (input.Length >= length) return input; // return on wrong input
 
             string spaces = new string(' ', length - input.Length);
             return input + spaces;
@@ -117,7 +122,7 @@ namespace MetaLog
             string stacktrace = string.Empty;
             if (exception.StackTrace != null)
             {
-                stacktrace = exception.StackTrace.TrimStart(); //add stacktrace if existing
+                stacktrace = exception.StackTrace.TrimStart(); // add stacktrace if existing
                 stacktrace = BuildTree(stacktrace, true) + Nl;
             }
 
@@ -146,8 +151,7 @@ namespace MetaLog
                     lines[i] += Nl; //add \n to every but last line
             }
 
-            string result = string.Concat(lines);
-            return result;
+            return string.Concat(lines);
         }
 
         /// <summary>
@@ -161,8 +165,7 @@ namespace MetaLog
 
             for (int i = 0; i < lines.Length; i++) lines[i] = $"{lines[i].TrimStart()}{Nl}";
 
-            string result = string.Concat(lines);
-            return result;
+            return string.Concat(lines);
         }
 
         /// <summary>
@@ -194,9 +197,9 @@ namespace MetaLog
         /// <returns>A built tree</returns>
         public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0)
         {
-            string[] lines = input.Split(new[] {Nl},
+            string[] lines = input.Split(new[] {"\n"},
                 StringSplitOptions.RemoveEmptyEntries);
-            string start = isSubtree ? SubTreeStart : TreeStart; //make ┬ or ┌ 
+            string start = isSubtree ? SubTreeStart : TreeStart; // make ┬ or ┌ 
 
             switch (lines.Length)
             {

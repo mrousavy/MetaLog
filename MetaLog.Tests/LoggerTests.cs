@@ -19,7 +19,7 @@ namespace MetaLog.Tests
         public void Init()
         {
             if (!Directory.Exists(LogDir)) Directory.CreateDirectory(LogDir);
-            Logger = MetaLog.Logger.New(LogFile, LogSeverity.Info, true);
+            Logger = MetaLog.Logger.New(LogFile, LogSeverity.Info);
         }
 
         [TestCleanup]
