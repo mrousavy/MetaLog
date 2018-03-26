@@ -21,7 +21,7 @@ namespace MetaLog
         /// <summary>
         ///     The new line character (<see cref="Environment.NewLine" />)
         /// </summary>
-        public static string Nl { get; set; } = Environment.NewLine;
+        public static string Nl { get; set; } = "\n";
 
         /// <summary>
         ///     Path to %AppData%
@@ -147,7 +147,7 @@ namespace MetaLog
             {
                 lines[i] = $"{indent}{lines[i]}";
                 if (i != lines.Length - 1)
-                    lines[i] += Nl; //add \n to every but last line
+                    lines[i] += Nl; // add \n to every but last line
             }
 
             return string.Concat(lines);
@@ -197,7 +197,7 @@ namespace MetaLog
         /// <returns>A built tree</returns>
         public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0)
         {
-            string[] lines = input.Split(new[] { "\n" },
+            string[] lines = input.Split(new[] { Nl },
                 StringSplitOptions.RemoveEmptyEntries);
             string start = isSubtree ? SubTreeStart : TreeStart; // make ┬ or ┌ 
 
@@ -229,7 +229,7 @@ namespace MetaLog
                 lines[lines.Length - 1] = Indent(text, whitespacesCount); // make ├
 
                 result = string.Join(Nl, lines);
-                result += Nl;
+                //result += Nl;
                 result += Indent($"{TreeEnd}{HSpacer}", whitespacesCount); // make └─
             }
 

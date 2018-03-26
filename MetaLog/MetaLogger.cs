@@ -193,7 +193,9 @@ namespace MetaLog
             {
                 // lock to sync object to prevent inconsistency
                 byte[] bytes = Encoding.GetBytes(text);
+                Stream.Position = Stream.Length;
                 Stream.Write(bytes, 0, bytes.Length);
+                Stream.Flush();
             }
         }
 
