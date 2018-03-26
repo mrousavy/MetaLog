@@ -11,7 +11,8 @@ namespace MetaLog
     /// </summary>
     public static class Logger
     {
-        public static ILogger Instance { get; } = new MetaLogger(Console.OpenStandardOutput(), LogSeverity.Info, Encoding.ASCII);
+        public static ILogger Instance { get; } =
+            new MetaLogger(Console.OpenStandardOutput(), LogSeverity.Info, Encoding.ASCII);
 
         #region ctor
 
@@ -62,7 +63,7 @@ namespace MetaLog
         /// <param name="minSeverity">The minimum severity to log messages to</param>
         /// <param name="encoding">The encoding to use for writing strings</param>
         /// <returns>An initialized <see cref="ILogger" /></returns>
-        public static ILogger New(Stream stream, LogSeverity minSeverity, Encoding encoding) 
+        public static ILogger New(Stream stream, LogSeverity minSeverity, Encoding encoding)
             => new MetaLogger(stream, minSeverity, encoding);
 
         #endregion

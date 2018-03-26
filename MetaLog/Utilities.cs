@@ -127,7 +127,8 @@ namespace MetaLog
 
             string message = $"{exception.GetType()}: {exception.Message}{Nl}{tree}{Nl}";
             if (exception.InnerException != null)
-                message += Indent($"Inner Exception:{Nl}{RecurseException(exception.InnerException, indent + 4, true)}", indent);
+                message += Indent($"Inner Exception:{Nl}{RecurseException(exception.InnerException, indent + 4, true)}",
+                    indent);
 
             return message;
         }
@@ -140,7 +141,7 @@ namespace MetaLog
         public static string Indent(string text, int amount)
         {
             string indent = new string(' ', amount);
-            string[] lines = text.Split(new[] { Nl },
+            string[] lines = text.Split(new[] {Nl},
                 StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
@@ -159,7 +160,7 @@ namespace MetaLog
         /// <param name="text">The input text</param>
         public static string ResetIndent(string text)
         {
-            string[] lines = text.Split(new[] { Nl },
+            string[] lines = text.Split(new[] {Nl},
                 StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
@@ -197,7 +198,7 @@ namespace MetaLog
         /// <returns>A built tree</returns>
         public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0)
         {
-            string[] lines = input.Split(new[] { Nl },
+            string[] lines = input.Split(new[] {Nl},
                 StringSplitOptions.RemoveEmptyEntries);
             string start = isSubtree ? SubTreeStart : TreeStart; // make ┬ or ┌ 
 
@@ -220,12 +221,12 @@ namespace MetaLog
             string result;
             if (isEnd)
             {
-                var text = $"{TreeEnd} {lines[lines.Length - 1]}";
+                string text = $"{TreeEnd} {lines[lines.Length - 1]}";
                 lines[lines.Length - 1] = Indent(text, whitespacesCount); // make └
                 result = string.Join(Nl, lines);
             } else
             {
-                var text = $"{TreeItem} {lines[lines.Length - 1]}";
+                string text = $"{TreeItem} {lines[lines.Length - 1]}";
                 lines[lines.Length - 1] = Indent(text, whitespacesCount); // make ├
 
                 result = string.Join(Nl, lines);
