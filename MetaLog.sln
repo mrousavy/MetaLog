@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaLog", "MetaLog\MetaLog.csproj", "{D2DACB48-3F4D-4C8D-8E97-FC291E400792}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaLog", "MetaLog\MetaLog.csproj", "{D2DACB48-3F4D-4C8D-8E97-FC291E400792}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaLog.Tests", "MetaLog.Tests\MetaLog.Tests.csproj", "{F9FF9512-CFCA-478D-9E9D-247940969F34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaLog.WpfTest", "MetaLog.WpfTest\MetaLog.WpfTest.csproj", "{54C2C575-1B36-409C-A690-5C581574F5B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{F9FF9512-CFCA-478D-9E9D-247940969F34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9FF9512-CFCA-478D-9E9D-247940969F34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9FF9512-CFCA-478D-9E9D-247940969F34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54C2C575-1B36-409C-A690-5C581574F5B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54C2C575-1B36-409C-A690-5C581574F5B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54C2C575-1B36-409C-A690-5C581574F5B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54C2C575-1B36-409C-A690-5C581574F5B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
