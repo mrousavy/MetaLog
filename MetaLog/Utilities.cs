@@ -36,7 +36,8 @@ namespace MetaLog
             get
             {
                 string path = Path.Combine(AppData, "MetaLog");
-                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
                 return path;
             }
         }
@@ -80,7 +81,8 @@ namespace MetaLog
         /// <returns></returns>
         private static string BringOnSameLength(string input, int length)
         {
-            if (input.Length >= length) return input; // return on wrong input
+            if (input.Length >= length)
+                return input; // return on wrong input
 
             string spaces = new string(' ', length - input.Length);
             return input + spaces;
@@ -115,20 +117,17 @@ namespace MetaLog
         ///     The amount of spaces for indentation
         ///     (will increase by 4 each inner-exception)
         /// </param>
+        /// <param name="subtree">The private recurse helper subtree bool</param>
         /// <returns>A built tree of <see cref="Exception.InnerException" />s</returns>
-        public static string RecurseException(Exception exception, int indent = 0)
+        public static string RecurseException(Exception exception, int indent = 0, bool subtree = false)
         {
-            //TODO: Use StringBuilder?
-            string stacktrace = string.Empty;
-            if (exception.StackTrace != null)
-            {
-                stacktrace = exception.StackTrace.TrimStart(); // add stacktrace if existing
-                stacktrace = BuildTree(stacktrace, true) + Nl;
-            }
+            string tree = exception.StackTrace.IsValid()
+                ? BuildTree(exception.StackTrace, subtree)
+                : string.Empty;
 
-            string message = $"{exception.GetType()}: {exception.Message}{Nl}{stacktrace}"; //construct message
-
-            if (exception.InnerException != null) message += RecurseException(exception.InnerException, indent + 4);
+            string message = $"{exception.GetType()}: {exception.Message}{Nl}{tree}{Nl}";
+            if (exception.InnerException != null)
+                message += Indent($"Inner Exception:{Nl}{RecurseException(exception.InnerException, indent + 4, true)}", indent);
 
             return message;
         }
@@ -141,7 +140,7 @@ namespace MetaLog
         public static string Indent(string text, int amount)
         {
             string indent = new string(' ', amount);
-            string[] lines = text.Split(new[] {Nl},
+            string[] lines = text.Split(new[] { Nl },
                 StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
@@ -160,10 +159,11 @@ namespace MetaLog
         /// <param name="text">The input text</param>
         public static string ResetIndent(string text)
         {
-            string[] lines = text.Split(new[] {Nl},
+            string[] lines = text.Split(new[] { Nl },
                 StringSplitOptions.RemoveEmptyEntries);
 
-            for (int i = 0; i < lines.Length; i++) lines[i] = $"{lines[i].TrimStart()}{Nl}";
+            for (int i = 0; i < lines.Length; i++)
+                lines[i] = $"{lines[i].TrimStart()}{Nl}";
 
             return string.Concat(lines);
         }
@@ -197,7 +197,7 @@ namespace MetaLog
         /// <returns>A built tree</returns>
         public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0)
         {
-            string[] lines = input.Split(new[] {"\n"},
+            string[] lines = input.Split(new[] { "\n" },
                 StringSplitOptions.RemoveEmptyEntries);
             string start = isSubtree ? SubTreeStart : TreeStart; // make ┬ or ┌ 
 
@@ -209,24 +209,28 @@ namespace MetaLog
                     return $"{HSpacer} {lines[0]}";
             }
 
-            string trimmed = lines[0].TrimStart(); //remove first whitespaces
-            int whitespacesCount = lines[0].Length - trimmed.Length + baseIndent; //number of whitespaces
-            string indent = new string(' ', whitespacesCount); //get original whitespace indent
+            string trimmed = lines[0].TrimStart(' ', '\t'); // remove first whitespaces
+            int whitespacesCount = lines[0].Length - trimmed.Length + baseIndent; // number of whitespaces
 
-            lines[0] = $"{indent}{start} {trimmed}";
+            lines[0] = Indent($"{start} {trimmed}", whitespacesCount);
 
-            for (int i = 1; i < lines.Length - 1; i++) lines[i] = $"{indent}{TreeItem} {lines[i]}"; //make ├ {line}
+            for (int i = 1; i < lines.Length - 1; i++)
+                lines[i] = Indent($"{TreeItem} {lines[i]}", whitespacesCount); // make ├ {line}
 
             string result;
             if (isEnd)
             {
-                lines[lines.Length - 1] = $"{indent}{TreeEnd} {lines[lines.Length - 1]}"; //make └
+                var text = $"{TreeEnd} {lines[lines.Length - 1]}";
+                lines[lines.Length - 1] = Indent(text, whitespacesCount); // make └
                 result = string.Join(Nl, lines);
             } else
             {
-                lines[lines.Length - 1] = $"{indent}{TreeItem} {lines[lines.Length - 1]}"; //make ├
+                var text = $"{TreeItem} {lines[lines.Length - 1]}";
+                lines[lines.Length - 1] = Indent(text, whitespacesCount); // make ├
+
                 result = string.Join(Nl, lines);
-                result += $"{Nl}{indent}{TreeEnd}{HSpacer}"; //make └─
+                result += Nl;
+                result += Indent($"{TreeEnd}{HSpacer}", whitespacesCount); // make └─
             }
 
             return result;
