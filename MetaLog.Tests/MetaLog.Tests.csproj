@@ -50,7 +50,6 @@
   <ItemGroup>
     <Compile Include="Helper.cs" />
     <Compile Include="LoggerTests.cs" />
-    <Compile Include="StaticTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

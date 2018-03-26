@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
+
 // ReSharper disable ExplicitCallerInfoArgument
 
 namespace MetaLog
@@ -12,334 +11,22 @@ namespace MetaLog
     /// </summary>
     public static class Logger
     {
-        private static bool _useStream;
-
-        private static string _logFile =
-            Path.Combine(Utilities.MetaLogAppData, $"{Utilities.ExecutingAssemblyName}.log");
-
-        #region Properties
-
-        /// <summary>
-        ///     Lock object so no logging interferes
-        /// </summary>
-        private static object Lock { get; } = new object();
-
-        /// <summary>
-        ///     The <see cref="Encoding" /> this <see cref="ILogger" /> instance uses
-        /// </summary>
-        private static readonly Encoding Encoding = Encoding.Unicode;
-
-        /// <summary>
-        ///     The <see cref="FileStream" /> used for writing to the LogFile
-        /// </summary>
-        private static FileStream FileStream { get; set; }
-
-        /// <summary>
-        ///     The path to the log file this <see cref="ILogger" />
-        ///     instance logs to.
-        ///     By default, this value is %appdata%/MetaLog/[YourAssemblyName].log
-        ///     <para />
-        ///     (Setting this to null will close the
-        ///     Stream if <see cref="UseStream" /> is set to true)
-        /// </summary>
-        /// <exception cref="DirectoryNotFoundException">
-        ///     Thrown when the directory of the
-        ///     file does not exist. Create the Directory of the <see cref="LogFile" />
-        ///     before setting this value
-        /// </exception>
-        public static string LogFile
-        {
-            get => _logFile;
-            set
-            {
-                if (value == _logFile)
-                    return; //don't reopen stream if it's same value
-                _logFile = value;
-                ToggleStream();
-            }
-        }
-
-        /// <summary>
-        ///     Whether this <see cref="ILogger" /> uses a single
-        ///     (File)-<see cref="Stream" /> for logging, or opens new
-        ///     ones each log. (<see cref="Stream" />s may be faster, but
-        ///     locks the file until the <see cref="ILogger" /> gets disposed, see:
-        ///     <see href="https://en.wikipedia.org/wiki/File_locking">file locking</see>)
-        /// </summary>
-        /// <exception cref="DirectoryNotFoundException">
-        ///     Thrown when the directory of the
-        ///     file does not exist. Create the Directory of the <see cref="LogFile" />
-        ///     before setting this value
-        /// </exception>
-        public static bool UseStream
-        {
-            get => _useStream;
-            set
-            {
-                if (value == _useStream)
-                    return; //don't change stream if it's same value
-                _useStream = value;
-                ToggleStream();
-            }
-        }
-
-        /// <summary>
-        ///     The minimum <see cref="LogSeverity" /> to log by this <see cref="Logger" />
-        ///     <em>
-        ///         (It is recommended to use higher values such as <see cref="LogSeverity.Error" />
-        ///         for release builds)
-        ///     </em>
-        /// </summary>
-        public static LogSeverity MinimumSeverity { get; set; }
-
-        #endregion
-
-        #region Functions
-
-        /// <summary>
-        ///     <em>(Re-)</em>open or close the <see cref="FileStream" /> to
-        ///     the <em>(new)</em> <see cref="LogFile" /> depending on the
-        ///     <see cref="UseStream" /> property
-        /// </summary>
-        private static void ToggleStream()
-        {
-            lock (Lock)
-            {
-                //lock to our lock object so we don't close a stream mid-write
-                FileStream?.Dispose(); //dispose the stream if open
-                if (LogFile != null && UseStream)
-                {
-                    //open filestream if Path is not null and Logger uses streams
-                    //create a new filestream to the LogFile (create if file does not exist, and seek to end)
-                    FileStream = new FileStream(LogFile, FileMode.Append, FileAccess.Write);
-                    FileStream.Position = FileStream.Length; //set position to end
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Release all resources and close any Streams
-        /// </summary>
-        public static void Dispose()
-        {
-            lock (Lock)
-            {
-                //lock so we don't interrupt a FileStream's write op
-                FileStream?.Dispose();
-            }
-        }
-
-        #endregion
-
-        #region Logging
-
-        //////////////////////////////////
-        //            LOGGER            //
-        //////////////////////////////////
-        
-        /// <summary>
-        ///     Log a new message to the <see cref="LogFile" />
-        /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
-        /// <param name="message">The actual log-message</param>
-        /// <param name="callerMember">The calling member for this Log message</param>
-        /// <param name="callerFile">The calling source file for this Log message</param>
-        /// <param name="callerLine">The line number in the calling file for this Log message</param>
-        public static void Log(LogSeverity severity, string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0)
-        {
-            if (severity < MinimumSeverity)
-                return; //don't log if it's below min severity
-
-            string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
-            WriteText(text);
-        }
-
-        /// <summary>
-        ///     Log a new <see cref="Exception" /> tree (up to most
-        ///     inner <see cref="Exception" />) to the <see cref="LogFile" />
-        /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
-        /// <param name="exception">An occured <see cref="Exception" /></param>
-        /// <param name="callerMember">The calling member for this Log message</param>
-        /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
-        /// <param name="callerFile">The calling source file for this Log message</param>
-        /// <param name="callerLine">The line number in the calling file for this Log message</param>
-        public static void Log(LogSeverity severity, Exception exception, int indent = 2,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0)
-        {
-            if (severity < MinimumSeverity)
-                return; //don't log if it's below min severity
-
-            string message = Utilities.RecurseException(exception, 2); //build exception tree
-            message = Utilities.BuildTree(message);
-            message = Utilities.Indent(message, indent);
-            message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
-            string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
-            WriteText(text);
-        }
-
-        /// <summary>
-        ///     Log a new message to the <see cref="LogFile" />
-        /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
-        /// <param name="message">The actual log-message</param>
-        /// <param name="callerMember">The calling member for this Log message</param>
-        /// <param name="callerFile">The calling source file for this Log message</param>
-        /// <param name="callerLine">The line number in the calling file for this Log message</param>
-        public static  Task LogAsync(LogSeverity severity, string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0)
-        {
-            if (severity < MinimumSeverity)
-                return Task.CompletedTask; //don't log if it's below min severity
-
-            return Task.Run(() =>
-            {
-                string text =
-                    Utilities.BuildMessage(severity, message, callerFile, callerMember,
-                        callerLine); //construct the message
-                WriteText(text);
-            });
-        }
-
-        /// <summary>
-        ///     Log a new <see cref="Exception" /> tree (up to most
-        ///     inner <see cref="Exception" />) to the <see cref="LogFile" /> async
-        /// </summary>
-        /// <param name="severity">The <see cref="LogSeverity" /> of this message</param>
-        /// <param name="exception">An occured <see cref="Exception" /></param>
-        /// <param name="callerMember">The calling member for this Log message</param>
-        /// <param name="indent">The amount of whitespaces to put before the Exception tree</param>
-        /// <param name="callerFile">The calling source file for this Log message</param>
-        /// <param name="callerLine">The line number in the calling file for this Log message</param>
-        public static Task LogAsync(LogSeverity severity, Exception exception, int indent = 2,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0)
-        {
-            if (severity < MinimumSeverity)
-                return Task.CompletedTask; //don't log if it's below min severity
-
-            return Task.Run(() =>
-            {
-                string message = Utilities.RecurseException(exception, 2); //build exception tree
-                message = Utilities.BuildTree(message);
-                message = Utilities.Indent(message, indent);
-                message = $"BEGIN EXCEPTION TREE:{Utilities.Nl}{message}";
-                string text = Utilities.BuildMessage(severity, message, callerFile, callerMember, callerLine); //construct the message
-                WriteText(text);
-            });
-        }
-
-
-        //////////////////////////////////
-        //    DIRECT-SEVERITY-LOGGER    //
-        //////////////////////////////////
-        public static void Debug(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            Log(LogSeverity.Debug, message, callerFile, callerMember, callerLine);
-
-        public static void Info(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            Log(LogSeverity.Info, message, callerFile, callerMember, callerLine);
-
-        public static void Warning(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            Log(LogSeverity.Warning, message, callerFile, callerMember, callerLine);
-
-        public static void Error(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            Log(LogSeverity.Error, message, callerFile, callerMember, callerLine);
-
-        public static void Critical(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            Log(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
-
-        //////////////////////////////////
-        // ASYNC DIRECT-SEVERITY-LOGGER //
-        //////////////////////////////////
-        public static Task DebugAsync(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            LogAsync(LogSeverity.Debug, message, callerFile, callerMember, callerLine);
-
-        public static Task InfoAsync(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            LogAsync(LogSeverity.Info, message, callerFile, callerMember, callerLine);
-
-        public static Task WarningAsync(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            LogAsync(LogSeverity.Warning, message, callerFile, callerMember, callerLine);
-
-        public static Task ErrorAsync(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            LogAsync(LogSeverity.Error, message, callerFile, callerMember, callerLine);
-
-        public static Task CriticalAsync(string message,
-            [CallerFilePath] string callerFile = null,
-            [CallerMemberName] string callerMember = null,
-            [CallerLineNumber] int callerLine = 0) =>
-            LogAsync(LogSeverity.Critical, message, callerFile, callerMember, callerLine);
-
-
-        private static void WriteText(string text)
-        {
-            lock (Lock)
-            {
-                // lock to sync object to prevent inconsistency
-                if (UseStream)
-                {
-                    // write via filestream
-                    byte[] bytes = Encoding.GetBytes(text);
-                    FileStream.Write(bytes, 0, bytes.Length);
-                } else
-                {
-                    // write via Sytem.IO.File helper
-                    File.AppendAllText(LogFile, text);
-                }
-            }
-        }
-
-        #endregion
-
+        public static ILogger Instance { get; } = new MetaLogger(Console.OpenStandardOutput());
 
         #region ctor
 
         /// <summary>
         ///     Create a new <see cref="ILogger" /> instance with the given properties
         /// </summary>
-        /// <param name="logfile"></param>
+        /// <param name="logfile">The file to log to</param>
         /// <returns>An initialized <see cref="ILogger" /></returns>
         public static ILogger New(string logfile) => new MetaLogger(logfile);
 
         /// <summary>
         ///     Create a new <see cref="ILogger" /> instance with the given properties
         /// </summary>
-        /// <param name="logfile"></param>
-        /// <param name="minSeverity">The LogFile</param>
+        /// <param name="logfile">The file to log to</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
         /// <returns>An initialized <see cref="ILogger" /></returns>
         public static ILogger New(string logfile, LogSeverity minSeverity) => new MetaLogger(logfile, minSeverity);
 
@@ -347,11 +34,36 @@ namespace MetaLog
         ///     Create a new <see cref="ILogger" /> instance with the given properties
         /// </summary>
         /// <param name="logfile"></param>
-        /// <param name="minSeverity">The LogFile</param>
-        /// <param name="useStream">The LogFile</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
+        /// <param name="encoding">The encoding to use for writing strings</param>
         /// <returns>An initialized <see cref="ILogger" /></returns>
-        public static ILogger New(string logfile, LogSeverity minSeverity, bool useStream) =>
-            new MetaLogger(logfile, minSeverity, useStream);
+        public static ILogger New(string logfile, LogSeverity minSeverity, Encoding encoding) =>
+            new MetaLogger(logfile, minSeverity, encoding);
+
+        /// <summary>
+        ///     Create a new <see cref="ILogger" /> instance with the given properties
+        /// </summary>
+        /// <param name="stream">The stream to log to</param>
+        /// <returns>An initialized <see cref="ILogger" /></returns>
+        public static ILogger New(Stream stream) => new MetaLogger(stream);
+
+        /// <summary>
+        ///     Create a new <see cref="ILogger" /> instance with the given properties
+        /// </summary>
+        /// <param name="stream">The stream to log to</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
+        /// <returns>An initialized <see cref="ILogger" /></returns>
+        public static ILogger New(Stream stream, LogSeverity minSeverity) => new MetaLogger(stream, minSeverity);
+
+        /// <summary>
+        ///     Create a new <see cref="ILogger" /> instance with the given properties
+        /// </summary>
+        /// <param name="stream">The stream to log to</param>
+        /// <param name="minSeverity">The minimum severity to log messages to</param>
+        /// <param name="encoding">The encoding to use for writing strings</param>
+        /// <returns>An initialized <see cref="ILogger" /></returns>
+        public static ILogger New(Stream stream, LogSeverity minSeverity, Encoding encoding) 
+            => new MetaLogger(stream, minSeverity, encoding);
 
         #endregion
     }
