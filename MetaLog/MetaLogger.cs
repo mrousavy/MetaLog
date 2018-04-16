@@ -44,7 +44,7 @@ namespace MetaLog
         /// <param name="logFile">The file to log to</param>
         /// <param name="minSeverity">The minimum severity to log messages to</param>
         public MetaLogger(string logFile, LogSeverity minSeverity)
-            : this(new FileStream(logFile, FileMode.OpenOrCreate), minSeverity, Encoding.Unicode)
+            : this(new FileStream(logFile, FileMode.OpenOrCreate), minSeverity, Encoding.UTF8)
         {
             _closeStream = true;
         }
@@ -75,7 +75,7 @@ namespace MetaLog
         /// <param name="stream">The stream to log to</param>
         /// <param name="minSeverity">The minimum severity to log messages to</param>
         public MetaLogger(Stream stream, LogSeverity minSeverity)
-            : this(stream, minSeverity, Encoding.Unicode)
+            : this(stream, minSeverity, Encoding.UTF8)
         { }
 
         /// <summary>

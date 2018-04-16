@@ -12,7 +12,7 @@ namespace MetaLog
     public static class Logger
     {
         public static ILogger Instance { get; } =
-            new MetaLogger(Console.OpenStandardOutput(), LogSeverity.Info, Encoding.ASCII);
+            new MetaLogger(Console.OpenStandardOutput(), LogSeverity.Info, Encoding.UTF8);
 
         #region ctor
 
