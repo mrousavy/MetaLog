@@ -87,3 +87,5 @@ Logger.Log(LogSeverity.Info, "Logged in as mrousavy, version 1.0!");
 
 # License
 > Thanks for using **MetaLog**! License: [MIT](https://github.com/mrousavy/MetaLog/blob/master/LICENSE), [mrousavy](http://github.com/mrousavy) 2017
+
+<a href='https://ko-fi.com/F1F8CLXG' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
