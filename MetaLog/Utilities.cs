@@ -61,7 +61,7 @@ namespace MetaLog
         internal static string BuildMessage(LogSeverity severity, string text, string callerFile, string callerMember,
             int callerLine)
         {
-            string time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
             string file = Path.GetFileNameWithoutExtension(callerFile);
 
             string strSeverity = $"[{severity}]";
