@@ -26,7 +26,7 @@ namespace MetaLog
         /// <summary>
         ///     Path to %AppData%
         /// </summary>
-        public static string AppData { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        public static string AppData => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
         /// <summary>
         ///     Path to %AppData%/MetaLog
@@ -50,7 +50,7 @@ namespace MetaLog
             get
             {
                 var execAssembly = Assembly.GetExecutingAssembly();
-                return execAssembly?.GetName()?.Name ?? "MetaLog"; //return caller name or "MetaLog"
+                return execAssembly?.GetName()?.Name ?? "MetaLog"; // return caller name or "MetaLog"
             }
         }
 
@@ -141,7 +141,7 @@ namespace MetaLog
         public static string Indent(string text, int amount)
         {
             string indent = new string(' ', amount);
-            string[] lines = text.Split(new[] {Nl},
+            var lines = text.Split(new[] { Nl },
                 StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
@@ -160,7 +160,7 @@ namespace MetaLog
         /// <param name="text">The input text</param>
         public static string ResetIndent(string text)
         {
-            string[] lines = text.Split(new[] {Nl},
+            string[] lines = text.Split(new[] { Nl },
                 StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
@@ -198,7 +198,7 @@ namespace MetaLog
         /// <returns>A built tree</returns>
         public static string BuildTree(string input, bool isSubtree = false, bool isEnd = true, int baseIndent = 0)
         {
-            string[] lines = input.Split(new[] {Nl},
+            string[] lines = input.Split(new[] { Nl },
                 StringSplitOptions.RemoveEmptyEntries);
             string start = isSubtree ? SubTreeStart : TreeStart; // make ┬ or ┌ 
 

@@ -11,8 +11,19 @@ namespace MetaLog
     /// </summary>
     public static class Logger
     {
-        public static ILogger Instance { get; } =
-            new MetaLogger(Console.OpenStandardOutput(), LogSeverity.Info, Encoding.UTF8);
+        public static ILogger Instance { get; }
+
+
+        static Logger()
+        {
+            try
+            {
+                Instance = new MetaLogger(Console.OpenStandardOutput(), LogSeverity.Info, Encoding.UTF8);
+            } catch
+            {
+                // could not create Logger instance
+            }
+        }
 
         #region ctor
 
